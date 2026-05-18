@@ -1,0 +1,37 @@
+services:
+    frontend:
+        build: ./frontend
+        ports: ["3000:3000"]
+        depends_on: [backend]
+
+    backend:
+        build: ./backend
+        ports: ["8000:8000"]
+        depends_on: [db, minio]
+        environment:
+            DATABASE_URL: postgres://user:pass@db:5432/mydb
+            MINIO_ENDPOINT: minio:9000
+
+    db:
+        image: postgres:16-alpine
+        ports: ["5432:5432"]
+        environment:
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: pass
+            POSTGRES_DB: mydb
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+
+    minio:
+        image: minio/minio
+        ports: ["9000:9000", "9001:9001"]
+        command: server /data --console-address ":9001"
+        environment:
+            MINIO_ROOT_USER: minioadmin
+            MINIO_ROOT_PASSWORD: minioadmin
+        volumes:
+            - miniodata:/data
+
+volumes:
+    pgdata:
+    miniodata:
