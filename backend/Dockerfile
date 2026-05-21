@@ -1,13 +1,11 @@
-FROM node:24
+FROM node:20-alpine
 
 WORKDIR /backend
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 
-EXPOSE 3000
-
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npm run migrate && npm start"]
