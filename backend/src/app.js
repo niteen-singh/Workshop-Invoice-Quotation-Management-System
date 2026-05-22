@@ -10,6 +10,6 @@ const app = express();
 
 app.use(express.json());
 app.use("/", healthRouter);
-app.use("/", costomeRouter);
+app.use("/cust/", costomeRouter);
 
 module.exports = app;
