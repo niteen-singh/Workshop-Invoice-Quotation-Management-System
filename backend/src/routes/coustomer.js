@@ -4,11 +4,25 @@ const { pool } = require("../lib/check");
 const router = Router();
 
 // GET /customers — list all
-router.get("/", async (req, res) => {
+// router.get("/", async (req, res) => {
+//     try {
+//         const { rows } = await pool.query(
+//             "SELECT * FROM customers ORDER BY created_at DESC",
+//         );
+//         res.json({ data: rows, count: rows.length });
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// });
+
+router.get("/", async (_req, res) => {
     try {
-        const { rows } = await pool.query(
-            "SELECT * FROM customers ORDER BY created_at DESC",
-        );
+        const { rows } = await pool.query(`
+      SELECT i.*, c.name AS customer_name
+      FROM invoices i
+      JOIN customers c ON c.id = i.customer_id
+      ORDER BY i.created_at DESC
+    `);
         res.json({ data: rows, count: rows.length });
     } catch (err) {
         res.status(500).json({ error: err.message });

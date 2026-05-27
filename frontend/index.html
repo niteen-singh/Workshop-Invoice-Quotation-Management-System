@@ -1,13 +1,78 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Dashboard — Workshop IQ</title>
+        <link rel="stylesheet" href="/assets/css/app.css" />
+    </head>
+    <body>
+        <div id="sidebar-placeholder"></div>
+
+        <div id="main">
+            <div id="topbar">
+                <h4>Dashboard</h4>
+                <div class="actions">
+                    <a href="/quotations-new.html" role="button" class="outline"
+                        >☐ &nbsp;New Quotation</a
+                    >
+                    <a href="/invoices-new.html" role="button" class="outline"
+                        >☐ &nbsp;New Invoice</a
+                    >
+                </div>
+            </div>
+
+            <div id="content">
+                <!-- Stat cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total customers</div>
+                        <div class="stat-value" id="stat-customers">—</div>
+                        <div class="stat-sub" id="stat-customers-sub"></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Open invoices</div>
+                        <div class="stat-value" id="stat-invoices">—</div>
+                        <div class="stat-sub" id="stat-invoices-sub"></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Quotations sent</div>
+                        <div class="stat-value" id="stat-quotations">—</div>
+                        <div class="stat-sub" id="stat-quotations-sub"></div>
+                    </div>
+                </div>
+
+                <!-- Recent invoices table -->
+                <figure>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Invoice #</th>
+                                <th style="text-align: right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-tbody">
+                            <tr>
+                                <td
+                                    colspan="3"
+                                    style="text-align: center"
+                                    class="secondary"
+                                >
+                                    Loading…
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </figure>
+            </div>
+        </div>
+
+        <script src="/assets/js/api.js"></script>
+        <script src="/assets/js/layout.js"></script>
+        <script src="/assets/js/pages/dashboard.js"></script>
+        <script>
+            loadSidebar("dashboard");
+        </script>
+    </body>
 </html>

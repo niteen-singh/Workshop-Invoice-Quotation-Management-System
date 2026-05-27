@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Customers — Workshop IQ</title>
+        <link rel="stylesheet" href="/assets/css/app.css" />
+    </head>
+    <body>
+        <!-- Sidebar injected here -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main -->
+        <div id="main">
+            <div id="topbar">
+                <h4>Customers</h4>
+                <div class="actions">
+                    <button onclick="openModal()">+ Add customer</button>
+                </div>
+            </div>
+
+            <div id="content">
+                <!-- Search -->
+                <input
+                    type="search"
+                    id="search"
+                    placeholder="Search by name, phone or GSTIN…"
+                    oninput="filterTable(this.value)"
+                    style="max-width: 360px; margin-bottom: 1rem"
+                />
+
+                <!-- Table -->
+                <figure>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>GSTIN</th>
+                                <th>Address</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-tbody">
+                            <tr>
+                                <td
+                                    colspan="6"
+                                    class="secondary"
+                                    style="text-align: center"
+                                >
+                                    Loading…
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </figure>
+            </div>
+        </div>
+
+        <!-- Add Customer Modal -->
+        <dialog id="customer-modal">
+            <article>
+                <header>
+                    <button
+                        aria-label="Close"
+                        rel="prev"
+                        onclick="closeModal()"
+                    ></button>
+                    <h5>Add customer</h5>
+                </header>
+
+                <form id="customer-form" onsubmit="submitCustomer(event)">
+                    <label
+                        >Name *<input
+                            name="name"
+                            required
+                            placeholder="e.g. Patil Engineering"
+                    /></label>
+                    <label
+                        >Phone<input name="phone" placeholder="98765 43210"
+                    /></label>
+                    <label
+                        >Email<input
+                            name="email"
+                            type="email"
+                            placeholder="contact@example.com"
+                    /></label>
+                    <label
+                        >GSTIN<input
+                            name="gstin"
+                            placeholder="27AABCP1234A1Z5"
+                            style="font-family: monospace"
+                    /></label>
+                    <label
+                        >Address<textarea
+                            name="address"
+                            rows="2"
+                            placeholder="Shop / unit address"
+                        ></textarea>
+                    </label>
+                </form>
+
+                <footer>
+                    <button class="secondary" onclick="closeModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" form="customer-form" id="save-btn">
+                        Save customer
+                    </button>
+                </footer>
+            </article>
+        </dialog>
+
+        <script src="/assets/js/api.js"></script>
+        <script src="/assets/js/layout.js"></script>
+        <script src="/assets/js/pages/customers.js"></script>
+        <script>
+            loadSidebar("customers");
+        </script>
+    </body>
+</html>

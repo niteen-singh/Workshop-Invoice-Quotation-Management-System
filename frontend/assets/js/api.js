@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const BASE = "/api"; // nginx proxies /api → backend:8000
 
 async function request(method, path, body) {
     const res = await fetch(`${BASE}${path}`, {
@@ -12,7 +12,7 @@ async function request(method, path, body) {
     return data;
 }
 
-export const api = {
+const api = {
     get: (path) => request("GET", path),
     post: (path, body) => request("POST", path, body),
     put: (path, body) => request("PUT", path, body),

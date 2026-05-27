@@ -1,0 +1,564 @@
+@import url("https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css");
+
+/* =========================================================
+   THEME
+========================================================= */
+
+:root {
+    --sidebar-width: 280px;
+    --topbar-height: 76px;
+
+    --bg: #181818;
+    --panel: #1f1f1f;
+    --panel-2: #242424;
+    --border: #343434;
+
+    --text: #f4f4f4;
+    --muted: #9b9b9b;
+
+    --primary: #ffffff;
+}
+
+html {
+    background: var(--bg);
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, sans-serif;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+#sidebar-placeholder {
+    position: relative;
+    background: linear-gradient(180deg, #1b1b1b 0%, #171717 100%);
+
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+
+    overflow-y: auto;
+
+    box-shadow:
+        inset -1px 0 0 rgba(255, 255, 255, 0.03),
+        0 0 40px rgba(0, 0, 0, 0.45);
+}
+
+/* Main sidebar */
+#sidebar-placeholder aside {
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    position: sticky;
+    top: 0;
+}
+
+/* =========================================================
+   TOP
+========================================================= */
+
+.sidebar-top {
+    padding: 2rem 1.75rem 1.5rem;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.logo-title {
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+
+    color: #ffffff;
+    line-height: 1.1;
+}
+
+.logo-subtitle {
+    margin-top: 0.45rem;
+
+    color: #7f7f7f;
+
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+#sidebar-placeholder nav {
+    flex: 1;
+
+    padding: 1.5rem 0.9rem;
+
+    overflow-y: auto;
+}
+
+#sidebar-placeholder nav small {
+    display: block;
+
+    margin: 1.2rem 0 0.8rem;
+
+    padding-left: 0.95rem;
+
+    font-size: 0.72rem;
+    font-weight: 600;
+
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+
+    color: #6f6f6f;
+}
+
+#sidebar-placeholder ul {
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+#sidebar-placeholder li {
+    list-style: none;
+}
+
+/* =========================================================
+   LINKS
+========================================================= */
+
+#sidebar-placeholder a {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    min-height: 52px;
+
+    padding: 0.95rem 1rem;
+
+    border-radius: 16px;
+
+    color: #bcbcbc;
+    text-decoration: none;
+
+    font-size: 0.95rem;
+    font-weight: 500;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        border-color 0.2s ease;
+}
+
+/* subtle hover glow */
+#sidebar-placeholder a:hover {
+    background: rgba(255, 255, 255, 0.05);
+
+    color: #ffffff;
+
+    transform: translateX(3px);
+}
+
+/* active item */
+#sidebar-placeholder a[aria-current="page"] {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.08),
+        rgba(255, 255, 255, 0.04)
+    );
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    color: #ffffff;
+
+    font-weight: 600;
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* left active indicator */
+#sidebar-placeholder a[aria-current="page"]::before {
+    content: "";
+
+    position: absolute;
+
+    left: -0.9rem;
+    top: 10px;
+
+    width: 4px;
+    height: calc(100% - 20px);
+
+    border-radius: 999px;
+
+    background: white;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+#sidebar-placeholder footer {
+    padding: 1.25rem 1.5rem;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.01),
+        rgba(255, 255, 255, 0.02)
+    );
+
+    backdrop-filter: blur(12px);
+}
+
+/* avatar */
+.user-avatar {
+    width: 48px;
+    height: 48px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(135deg, #2d5fff, #1f3f9f);
+
+    color: white;
+
+    font-size: 0.95rem;
+    font-weight: 700;
+
+    box-shadow: 0 10px 24px rgba(45, 95, 255, 0.25);
+}
+
+.user-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-meta strong {
+    color: #ffffff;
+
+    font-size: 0.92rem;
+    line-height: 1.2;
+}
+
+.user-meta small {
+    margin-top: 0.15rem;
+
+    color: #8d8d8d;
+
+    font-size: 0.8rem;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+#main {
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(255, 255, 255, 0.03),
+            transparent 30%
+        ),
+        #181818;
+}
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
+#topbar {
+    min-height: 88px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 1.25rem 2rem;
+
+    gap: 2rem;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+    background: rgba(24, 24, 24, 0.72);
+
+    backdrop-filter: blur(12px);
+}
+
+#topbar h2,
+#topbar h3,
+#topbar h4 {
+    margin: 0;
+    color: white;
+}
+
+.actions {
+    margin-left: auto;
+
+    display: flex;
+    align-items: center;
+
+    gap: 0.85rem;
+}
+
+.actions button,
+.actions a[role="button"] {
+    height: 44px;
+
+    padding: 0 1.1rem;
+
+    border-radius: 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    background: rgba(255, 255, 255, 0.03);
+
+    color: white;
+
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    display: flex;
+    align-items: center;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.actions button:hover,
+.actions a[role="button"]:hover {
+    background: rgba(255, 255, 255, 0.06);
+
+    border-color: rgba(255, 255, 255, 0.12);
+
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+#content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+/* =========================================================
+   DASHBOARD STATS
+========================================================= */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--panel);
+    border-radius: 22px;
+    padding: 1.8rem;
+    border: 1px solid #2f2f2f;
+}
+
+.stat-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1rem;
+}
+.stat-card h2 {
+    margin: 1rem 0 0.3rem;
+    font-size: 3rem;
+}
+.stat-card small {
+    color: var(--muted);
+}
+
+/* =========================================================
+   TABLE PANEL
+========================================================= */
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+table {
+    margin: 0;
+    width: 100%;
+    background: transparent;
+}
+thead {
+    background: #202020;
+}
+th {
+    color: #a7a7a7;
+    font-weight: 600;
+}
+td,
+th {
+    padding: 1.3rem 1.5rem;
+    border-color: #333;
+}
+tbody tr:hover {
+    background: #252525;
+}
+
+/* =========================================================
+   STATUS BADGES
+========================================================= */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.badge-green {
+    background: #e7f6dc;
+    color: #46761e;
+}
+.badge-amber {
+    background: #fff0d6;
+    color: #8f5b12;
+}
+.badge-blue {
+    background: #dcecff;
+    color: #215fa9;
+}
+.badge-red {
+    background: #fde8e8;
+    color: #9b1c1c;
+}
+
+/* =========================================================
+   LINE ITEMS TABLE (invoice builder)
+========================================================= */
+
+.line-items-table {
+    width: 100%;
+    min-width: 640px;
+}
+
+.line-items-table th {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--muted);
+    padding: 0.6rem 0.5rem;
+    text-align: left;
+    background: #202020;
+}
+
+.line-items-table td {
+    padding: 0.25rem 0.25rem;
+    vertical-align: middle;
+}
+
+.line-items-table td input,
+.line-items-table td select {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text);
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+    margin: 0;
+    border-radius: 8px;
+}
+
+.line-items-table td input:focus,
+.line-items-table td select:focus {
+    border-color: var(--border);
+    background: var(--panel-2);
+    outline: none;
+}
+
+.line-items-table td select option {
+    background: var(--panel);
+}
+
+.row-total {
+    text-align: right;
+    font-size: 0.9rem;
+    padding-right: 0.75rem;
+    white-space: nowrap;
+    color: var(--text);
+}
+
+/* =========================================================
+   TOTALS BOX
+========================================================= */
+
+.totals-table {
+    width: 300px;
+    font-size: 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.totals-table td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+}
+
+.totals-table td:last-child {
+    text-align: right;
+    color: var(--text);
+}
+.totals-table tr:last-child td {
+    border-bottom: none;
+    background: var(--panel-2);
+}
+
+/* =========================================================
+   Global
+========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+    body {
+        grid-template-columns: 1fr;
+    }
+    #sidebar-placeholder {
+        display: none;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
