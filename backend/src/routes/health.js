@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { checkPostgres, checkMinio } = require("../lib/check");
+const { checkPostgres, checkMinio } = require("../lib/checks");
 
 const router = Router();
 

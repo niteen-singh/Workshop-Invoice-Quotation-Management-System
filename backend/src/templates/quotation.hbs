@@ -1,0 +1,451 @@
+<html lang="en">
+    <head>
+
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Quotation</title>
+
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            @page {
+                size: A4;
+                margin: 8mm;
+            }
+
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 12px;
+                color: #000;
+                background: #fff;
+            }
+
+            .quotation {
+                width: 100%;
+                border: 1px solid #000;
+            }
+
+            .quotation table {
+                page-break-inside: avoid;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            td,
+            th {
+                border: 1px solid #000;
+                padding: 3px 5px;
+                vertical-align: top;
+            }
+
+            .center {
+                text-align: center;
+            }
+            .right {
+                text-align: right;
+            }
+            .bold {
+                font-weight: bold;
+            }
+
+            /* ======================
+   HEADER
+====================== */
+
+            .logo-cell {
+                width: 130px;
+                text-align: center;
+                vertical-align: middle;
+            }
+
+            .logo {
+                max-width: 120px;
+                max-height: 80px;
+            }
+
+            .doc-title-cell {
+                width: 160px;
+                text-align: center;
+                vertical-align: middle;
+            }
+
+            .doc-title {
+                background: #000;
+                color: #fff;
+                padding: 5px 14px;
+                border-radius: 4px;
+                font-size: 16px;
+                font-weight: bold;
+                letter-spacing: 1px;
+                display: inline-block;
+            }
+
+            .company-name {
+                text-align: center;
+                font-size: 28px;
+                font-weight: 900;
+                color: #c1121f;
+                line-height: 1;
+                margin-bottom: 4px;
+            }
+
+            .company-details {
+                text-align: center;
+                font-size: 11.5px;
+                line-height: 1.7;
+            }
+
+            /* ======================
+   GST ROW
+====================== */
+
+            .gst-row td {
+                font-weight: bold;
+                text-align: center;
+                font-size: 12px;
+                padding: 5px 6px;
+            }
+
+            /* ======================
+   CUSTOMER SECTION
+====================== */
+
+            .customer-left {
+                width: 65%;
+                min-height: 110px;
+                padding: 6px 8px;
+                line-height: 1.6;
+            }
+
+            .customer-right {
+                width: 32%;
+                padding: 0;
+            }
+
+            .meta-table td {
+                height: 30px;
+                font-size: 12px;
+                padding: 3px 5px;
+            }
+
+            .meta-label {
+                font-weight: bold;
+                width: 55%;
+                white-space: nowrap;
+            }
+
+            /* ======================
+   ITEMS TABLE
+====================== */
+
+            .items-table th {
+                text-align: center;
+                background: #f5f5f5;
+                font-size: 12px;
+                padding: 5px 4px;
+            }
+
+            .items-table td {
+                font-size: 12px;
+                padding: 5px 5px;
+            }
+
+            .sr-col {
+                width: 5%;
+                text-align: center;
+            }
+            .desc-col {
+                width: 42%;
+            }
+            .hsn-col {
+                width: 13%;
+                text-align: center;
+            }
+            .qty-col {
+                width: 10%;
+                text-align: center;
+            }
+            .rate-col {
+                width: 15%;
+                text-align: right;
+            }
+            .amt-col {
+                width: 15%;
+                text-align: right;
+            }
+
+            .item-row td {
+                height: 22px;
+            }
+
+            .empty-row td {
+                height: 18px;
+            }
+
+            /* ======================
+   TOTAL SECTION
+====================== */
+
+            .words-row td {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+
+            .total-label {
+                font-weight: bold;
+            }
+
+            .grand-total-row td {
+                font-weight: bold;
+                font-size: 14px;
+                padding: 7px 8px;
+            }
+
+            /* ======================
+   FOOTER
+====================== */
+
+            .terms-box {
+                padding: 6px 8px;
+                line-height: 1.6;
+                font-size: 11.5px;
+                white-space: pre-line;
+            }
+
+            .bank-box {
+                padding: 6px 8px;
+                line-height: 1.7;
+                font-size: 11.5px;
+            }
+
+            .sign-row td {
+                height: 60pxpx;
+                vertical-align: bottom;
+                text-align: center;
+                font-weight: bold;
+                font-size: 12px;
+                padding-bottom: 8px;
+            }
+
+            @media print {
+                body {
+                    background: #fff;
+                    padding: 0;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="quotation">
+
+            <!-- ── HEADER ─────────────────────────────────── -->
+
+            <table>
+                <tr>
+
+                    <!-- Logo -->
+                    <td class="logo-cell">
+                        {{#if seller.logo}}
+                            <img
+                                src="{{seller.logo}}"
+                                class="logo"
+                                alt="logo"
+                            />
+                        {{/if}}
+                    </td>
+
+                    <!-- Company info -->
+                    <td>
+                        <div class="company-name">{{seller.companyName}}</div>
+                        <div class="company-details">
+                            {{seller.tagline}}<br />
+                            {{seller.address}}<br />
+                            Mob:
+                            {{seller.mobile}}
+                            &nbsp;&nbsp; Email:
+                            {{seller.email}}
+                        </div>
+                    </td>
+
+                    <!-- Document title -->
+                    <td class="doc-title-cell">
+                        <div class="doc-title">QUOTATION</div>
+                    </td>
+
+                </tr>
+            </table>
+
+            <!-- ── GST / PAN ROW ──────────────────────────── -->
+
+            <table>
+                <tr class="gst-row">
+                    <td>GST No : {{seller.gstin}}</td>
+                    <td>PAN : {{seller.pan}}</td>
+                </tr>
+            </table>
+
+            <!-- ── CUSTOMER + META ────────────────────────── -->
+
+            <table>
+                <tr>
+
+                    <!-- Left: buyer details -->
+                    <td class="customer-left">
+                        <span class="bold">To,</span><br /><br />
+                        {{buyer.companyName}}<br />
+                        {{buyer.address}}<br /><br />
+                        {{#if buyer.attention}}
+                            <span class="bold">Kind Attention :</span>
+                            {{buyer.attention}}<br />
+                        {{/if}}
+                        {{#if buyer.subject}}
+                            <span class="bold">Subject :</span>
+                            {{buyer.subject}}
+                        {{/if}}
+                    </td>
+
+                    <!-- Right: quotation meta -->
+                    <td style="padding:0">
+                        <table class="meta-table">
+                            <tr>
+                                <td class="meta-label">Quotation Ref No :</td>
+                                <td>{{quotation.refNo}}</td>
+                            </tr>
+                            <tr>
+                                <td class="meta-label">Date :</td>
+                                <td>{{quotation.date}}</td>
+                            </tr>
+                            {{#if quotation.validUntil}}
+                                <tr>
+                                    <td class="meta-label">Valid Until :</td>
+                                    <td>{{quotation.validUntil}}</td>
+                                </tr>
+                            {{/if}}
+                        </table>
+                    </td>
+
+                </tr>
+            </table>
+
+            <!-- ── LINE ITEMS ─────────────────────────────── -->
+
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th class="sr-col">Sr.<br />No.</th>
+                        <th class="desc-col">Description</th>
+                        <th class="hsn-col">HSN/SAC</th>
+                        <th class="qty-col">Qty.</th>
+                        <th class="rate-col">Unit Price</th>
+                        <th class="amt-col">Amount Rs.</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {{#each items}}
+                        <tr class="item-row">
+                            <td class="center">{{srNo}}</td>
+                            <td>{{description}}</td>
+                            <td class="center">{{hsnCode}}</td>
+                            <td class="center">{{quantity}}</td>
+                            <td class="right">{{unitPrice}}</td>
+                            <td class="right">{{amount}}</td>
+                        </tr>
+                    {{/each}}
+
+                    {{#each emptyRows}}
+                        <tr class="empty-row">
+                            <td>&nbsp;</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    {{/each}}
+
+                </tbody>
+            </table>
+
+            <!-- ── TOTALS ──────────────────────────────────── -->
+
+            <table>
+
+                <!-- Amount in words + Grand total -->
+                <tr class="words-row">
+                    <td style="width:68%">
+                        <span class="bold">Amount in Words :</span>
+                        {{totals.grandTotalWords}}
+                    </td>
+                    <td class="total-label" style="width:17%">Grand Total</td>
+                    <td
+                        class="right"
+                        style="width:15%;font-weight:bold;font-size:13px"
+                    >
+                        {{totals.grandTotal}}
+                    </td>
+                </tr>
+
+            </table>
+
+            <!-- ── TERMS & CONDITIONS ─────────────────────── -->
+
+            <table>
+                <tr>
+                    <td class="terms-box">
+                        <span class="bold">Terms &amp; Conditions :-</span><br
+                        />
+                        {{{terms}}}
+                    </td>
+                </tr>
+            </table>
+
+            <!-- ── BANK DETAILS + SIGNATURE ──────────────── -->
+
+            <table>
+                <tr>
+
+                    <td style="width:68%">
+                        <div class="bank-box">
+                            <span class="bold">Bank A/C Details :-</span><br />
+                            <span class="bold">A/C Name :</span>
+                            {{bank.accountName}}<br />
+                            <span class="bold">A/C No :</span>
+                            {{bank.accountNo}}<br />
+                            <span class="bold">IFSC :</span>
+                            {{bank.ifsc}}<br />
+                            <span class="bold">Branch :</span>
+                            {{bank.branch}}
+                        </div>
+                    </td>
+
+                    <td style="width:32%;padding:0">
+                        <div
+                            style="text-align:center;padding:8px;font-weight:bold;font-size:13px;
+                            border-bottom:1px solid #000"
+                        >
+                            For
+                            {{seller.companyName}}
+                        </div>
+                        <table>
+                            <tr class="sign-row">
+                                <td>Receiver's<br />Signature</td>
+                                <td>Authorised<br />Signatory</td>
+                            </tr>
+                        </table>
+                    </td>
+
+                </tr>
+            </table>
+
+        </div>
+    </body>
+</html>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Settings — Workshop IQ</title>
+        <link rel="stylesheet" href="/assets/css/app.css" />
+    </head>
+    <body>
+        <div id="sidebar-placeholder"></div>
+
+        <div id="main">
+            <div id="topbar">
+                <h4>Settings</h4>
+                <div class="actions">
+                    <button onclick="saveProfile()" id="save-btn">
+                        Save changes
+                    </button>
+                </div>
+            </div>
+
+            <div id="content">
+                <div
+                    id="setup-banner"
+                    style="
+                        display: none;
+                        background: #1a2f1a;
+                        border: 1px solid #2d5a2d;
+                        border-radius: 14px;
+                        padding: 1rem 1.5rem;
+                        margin-bottom: 1.5rem;
+                        color: #7fcf7f;
+                        font-size: 0.9rem;
+                    "
+                >
+                    👋 Welcome! Fill in your company and bank details to get
+                    started. This only needs to be done once.
+                </div>
+                <div class="settings-section">
+                    <div class="settings-section-title">Company details</div>
+                    <div class="settings-grid">
+                        <div class="field-group">
+                            <label class="field-label">Company name *</label>
+                            <input
+                                id="company_name"
+                                placeholder="e.g. Patil Engineering Works"
+                            />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Tagline</label>
+                            <input
+                                id="tagline"
+                                placeholder="e.g. Precision Engineering Solutions"
+                            />
+                        </div>
+                        <div class="field-group" style="grid-column: 1/-1">
+                            <label class="field-label">Office address</label>
+                            <input
+                                id="office_address"
+                                placeholder="Office / registered address"
+                            />
+                        </div>
+                        <div class="field-group" style="grid-column: 1/-1">
+                            <label class="field-label">Works address</label>
+                            <input
+                                id="works_address"
+                                placeholder="Factory / workshop address"
+                            />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Email</label>
+                            <input
+                                id="email"
+                                type="email"
+                                placeholder="contact@yourcompany.com"
+                            />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Mobile 1</label>
+                            <input id="mobile1" placeholder="98765 43210" />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Mobile 2</label>
+                            <input
+                                id="mobile2"
+                                placeholder="Optional second number"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">GST details</div>
+                    <div class="settings-grid">
+                        <div class="field-group">
+                            <label class="field-label">GSTIN</label>
+                            <input
+                                id="gstin"
+                                placeholder="27AABCP1234A1Z5"
+                                style="font-family: monospace"
+                            />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">State</label>
+                            <input id="state" placeholder="Maharashtra" />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">State code</label>
+                            <input id="state_code" placeholder="27" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">Bank details</div>
+                    <div class="settings-grid">
+                        <div class="field-group">
+                            <label class="field-label">Bank name</label>
+                            <input id="bank_name" placeholder="HDFC Bank" />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Account number</label>
+                            <input
+                                id="account_no"
+                                placeholder="XXXX XXXX XXXX"
+                                style="font-family: monospace"
+                            />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Branch</label>
+                            <input
+                                id="bank_branch"
+                                placeholder="Pune - Pimpri"
+                            />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">IFSC code</label>
+                            <input
+                                id="ifsc"
+                                placeholder="HDFC0001234"
+                                style="font-family: monospace"
+                            />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">PAN number</label>
+                            <input
+                                id="pan"
+                                placeholder="AABCP1234A"
+                                style="font-family: monospace"
+                            />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Account name</label>
+                            <input
+                                id="account_name"
+                                placeholder="e.g. Syringe Enterprises"
+                            />
+                        </div>
+                    </div>
+                    <div class="settings-section-title">
+                        Default terms & conditions
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label"
+                            >Printed on every quotation</label
+                        >
+                        <textarea
+                            id="terms"
+                            rows="4"
+                            placeholder="Payment: 60% advanced and 40% against delivery.&#10;GST 18% or as applicable.&#10;Work will start after receiving final PO."
+                            style="
+                                background: var(--panel);
+                                border: 1px solid var(--border);
+                                border-radius: 12px;
+                                color: var(--text);
+                                padding: 0.85rem 1rem;
+                                font-size: 0.9rem;
+                                width: 100%;
+                                resize: vertical;
+                            "
+                        ></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="/assets/js/api.js"></script>
+        <script src="/assets/js/layout.js"></script>
+        <script src="/assets/js/pages/settings.js"></script>
+        <script>
+            loadSidebar("settings");
+        </script>
+    </body>
+</html>

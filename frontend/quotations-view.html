@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Quotation — Workshop IQ</title>
+        <link rel="stylesheet" href="/assets/css/app.css" />
+    </head>
+    <body>
+        <div id="sidebar-placeholder"></div>
+
+        <div id="main">
+            <div id="topbar">
+                <h4 id="topbar-title">Quotation</h4>
+                <div class="actions">
+                    <a href="/quotations.html" role="button" class="secondary"
+                        >← Back</a
+                    >
+                    <button id="status-btn" onclick="cycleStatus()">
+                        Mark as sent
+                    </button>
+                    <button id="pdf-btn" onclick="downloadPdf()">
+                        ⬇ Download PDF
+                    </button>
+                </div>
+            </div>
+
+            <div id="content">
+                <div
+                    id="loading"
+                    style="
+                        text-align: center;
+                        color: var(--muted);
+                        padding: 3rem;
+                    "
+                >
+                    Loading…
+                </div>
+
+                <div id="quote-detail" style="display: none">
+                    <!-- Meta cards -->
+                    <div class="view-meta-grid">
+                        <div class="view-meta-card">
+                            <div class="view-meta-label">Customer</div>
+                            <div class="view-meta-value" id="v-customer"></div>
+                        </div>
+                        <div class="view-meta-card">
+                            <div class="view-meta-label">Quote #</div>
+                            <div
+                                class="view-meta-value"
+                                id="v-number"
+                                style="font-family: monospace"
+                            ></div>
+                        </div>
+                        <div class="view-meta-card">
+                            <div class="view-meta-label">Quote date</div>
+                            <div class="view-meta-value" id="v-date"></div>
+                        </div>
+                        <div class="view-meta-card">
+                            <div class="view-meta-label">Valid until</div>
+                            <div class="view-meta-value" id="v-valid"></div>
+                        </div>
+                        <div class="view-meta-card">
+                            <div class="view-meta-label">Status</div>
+                            <div class="view-meta-value" id="v-status"></div>
+                        </div>
+                        <div class="view-meta-card">
+                            <div class="view-meta-label">Total amount</div>
+                            <div
+                                class="view-meta-value"
+                                id="v-total"
+                                style="font-size: 1.4rem; font-weight: 700"
+                            ></div>
+                        </div>
+                    </div>
+
+                    <!-- Subject / Attention — shown only if present -->
+                    <div
+                        id="subject-section"
+                        class="form-section"
+                        style="display: none"
+                    >
+                        <div class="form-section-title">Details</div>
+                        <div
+                            style="
+                                display: grid;
+                                grid-template-columns: 1fr 1fr;
+                                gap: 1rem;
+                            "
+                        >
+                            <div id="subject-block" style="display: none">
+                                <div class="view-meta-label">Subject</div>
+                                <div
+                                    id="v-subject"
+                                    style="
+                                        margin-top: 0.3rem;
+                                        color: var(--text);
+                                        font-size: 0.95rem;
+                                    "
+                                ></div>
+                            </div>
+                            <div id="attention-block" style="display: none">
+                                <div class="view-meta-label">
+                                    Kind attention
+                                </div>
+                                <div
+                                    id="v-attention"
+                                    style="
+                                        margin-top: 0.3rem;
+                                        color: var(--text);
+                                        font-size: 0.95rem;
+                                    "
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Line items -->
+                    <div class="form-section">
+                        <div class="form-section-title">Line items</div>
+                        <div style="overflow-x: auto">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 36px">#</th>
+                                        <th>Description</th>
+                                        <th
+                                            style="
+                                                width: 110px;
+                                                text-align: center;
+                                            "
+                                        >
+                                            HSN
+                                        </th>
+                                        <th
+                                            style="
+                                                width: 80px;
+                                                text-align: center;
+                                            "
+                                        >
+                                            Qty
+                                        </th>
+                                        <th
+                                            style="
+                                                width: 120px;
+                                                text-align: right;
+                                            "
+                                        >
+                                            Unit price (₹)
+                                        </th>
+                                        <th
+                                            style="
+                                                width: 120px;
+                                                text-align: right;
+                                            "
+                                        >
+                                            Amount (₹)
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="v-line-items"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Grand total -->
+                    <div
+                        style="
+                            display: flex;
+                            justify-content: flex-end;
+                            margin-bottom: 1.5rem;
+                        "
+                    >
+                        <table class="totals-table">
+                            <tr class="grand-row">
+                                <td><strong>Grand total</strong></td>
+                                <td id="v-grand"><strong>—</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Notes -->
+                    <div
+                        id="notes-section"
+                        class="form-section"
+                        style="display: none"
+                    >
+                        <div class="form-section-title">Notes</div>
+                        <div
+                            id="v-notes"
+                            style="color: var(--muted); font-size: 0.9rem"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="/assets/js/api.js"></script>
+        <script src="/assets/js/layout.js"></script>
+        <script src="/assets/js/pages/quotations-view.js"></script>
+        <script>
+            loadSidebar("quotations");
+        </script>
+    </body>
+</html>

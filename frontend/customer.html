@@ -15,46 +15,46 @@
             <div id="topbar">
                 <h4>Customers</h4>
                 <div class="actions">
-                    <button onclick="openModal()">+ Add customer</button>
+                    <button onclick="openModal()">☐ &nbsp;Add customer</button>
                 </div>
             </div>
 
             <div id="content">
-                <!-- Search -->
-                <input
-                    type="search"
-                    id="search"
-                    placeholder="Search by name, phone or GSTIN…"
-                    oninput="filterTable(this.value)"
-                    style="max-width: 360px; margin-bottom: 1rem"
-                />
+                <!-- Search bar -->
+                <div class="search-bar">
+                    <span class="search-icon">☐</span>
+                    <input
+                        type="search"
+                        id="search"
+                        placeholder="Search by name, phone, or GSTIN…"
+                        oninput="filterTable(this.value)"
+                    />
+                    <span id="customer-count" class="search-count"
+                        >Loading…</span
+                    >
+                </div>
 
                 <!-- Table -->
-                <figure>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Name</th>
-                                <th>Phone</th>
-                                <th>GSTIN</th>
-                                <th>Address</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="customers-tbody">
-                            <tr>
-                                <td
-                                    colspan="6"
-                                    class="secondary"
-                                    style="text-align: center"
-                                >
-                                    Loading…
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </figure>
+                <table id="customers-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>GSTIN</th>
+                            <th>Since</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customers-tbody">
+                        <tr>
+                            <td
+                                colspan="4"
+                                style="text-align: center; color: var(--muted)"
+                            >
+                                Loading…
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -69,7 +69,6 @@
                     ></button>
                     <h5>Add customer</h5>
                 </header>
-
                 <form id="customer-form" onsubmit="submitCustomer(event)">
                     <label
                         >Name *<input
@@ -100,7 +99,6 @@
                         ></textarea>
                     </label>
                 </form>
-
                 <footer>
                     <button class="secondary" onclick="closeModal()">
                         Cancel

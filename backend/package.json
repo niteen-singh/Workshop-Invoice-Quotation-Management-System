@@ -15,9 +15,11 @@
     "dependencies": {
         "dotenv": "^17.4.2",
         "express": "^5.2.1",
+        "handlebars": "^4.7.9",
         "minio": "^8.0.7",
         "node-pg-migrate": "^8.0.4",
         "nodemon": "^3.1.14",
-        "pg": "^8.21.0"
+        "pg": "^8.21.0",
+        "puppeteer": "^25.1.0"
     }
 }
