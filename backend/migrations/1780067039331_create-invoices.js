@@ -20,6 +20,7 @@ exports.up = (pgm) => {
         quote_date: { type: "date" },
         attention: { type: "varchar(255)" },
         subject: { type: "text" },
+        user_id: { type: "uuid", references: '"users"', onDelete: "CASCADE" },
         created_at: { type: "timestamptz", default: pgm.func("now()") },
     });
 
@@ -54,6 +55,7 @@ exports.up = (pgm) => {
         vendor_code: { type: "varchar(50)" },
         vehicle_no: { type: "varchar(30)" },
         notes: { type: "text" },
+        user_id: { type: "uuid", references: '"users"', onDelete: "CASCADE" },
         created_at: { type: "timestamptz", default: pgm.func("now()") },
     });
 
@@ -81,6 +83,10 @@ exports.up = (pgm) => {
         total: { type: "numeric(12,2)", notNull: true },
     });
 
+    pgm.createIndex("customers", "user_id");
+    pgm.createIndex("quotations", "user_id");
+    pgm.createIndex("invoices", "user_id");
+    pgm.createIndex("workshop_profile", "user_id");
     pgm.createIndex("quotations", "customer_id");
     pgm.createIndex("invoices", "customer_id");
     pgm.createIndex("invoices", "quotation_id");

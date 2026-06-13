@@ -46,7 +46,7 @@ async function setNextInvoiceNumber() {
 }
 
 // ── Row management ────────────────────────────────────────
-const MAX_ROWS = 12;
+const MAX_ROWS = 17;
 
 function addRow() {
     const body = document.getElementById("line-items-body");

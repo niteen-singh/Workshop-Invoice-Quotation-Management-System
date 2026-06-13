@@ -11,6 +11,8 @@ exports.up = (pgm) => {
         email: { type: "varchar(255)" },
         address: { type: "text" },
         gstin: { type: "varchar(15)" },
+        user_id: { type: "uuid", references: '"users"', onDelete: "CASCADE" },
+
         created_at: { type: "timestamptz", default: pgm.func("now()") },
     });
 

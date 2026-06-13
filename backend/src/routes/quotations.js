@@ -8,11 +8,13 @@ const {
 
 const router = Router();
 
-// GET /quotations/next-number
-router.get("/next-number", async (_req, res) => {
+router.get("/next-number", async (req, res) => {
     try {
         const { rows } = await pool.query(
-            `SELECT quote_number FROM quotations ORDER BY created_at DESC LIMIT 1`,
+            `SELECT quote_number FROM quotations
+             WHERE user_id = $1
+             ORDER BY created_at DESC LIMIT 1`,
+            [req.userId],
         );
         if (!rows.length) return res.json({ number: "QT-001" });
         const num = parseInt(rows[0].quote_number.replace(/\D/g, "")) + 1;
@@ -22,38 +24,38 @@ router.get("/next-number", async (_req, res) => {
     }
 });
 
-// GET /quotations
-router.get("/", async (_req, res) => {
+router.get("/", async (req, res) => {
     try {
-        const { rows } = await pool.query(`
-            SELECT q.*, c.name AS customer_name
-            FROM quotations q
-            JOIN customers c ON c.id = q.customer_id
-            ORDER BY q.created_at DESC
-        `);
+        const { rows } = await pool.query(
+            `SELECT q.*, c.name AS customer_name
+             FROM quotations q
+             JOIN customers c ON c.id = q.customer_id
+             WHERE q.user_id = $1
+             ORDER BY q.created_at DESC`,
+            [req.userId],
+        );
         res.json({ data: rows, count: rows.length });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// GET /quotations/:id
 router.get("/:id", async (req, res) => {
     try {
         const { rows: qRows } = await pool.query(
-            `
-            SELECT q.*, c.name AS customer_name, c.address AS customer_address, c.gstin AS customer_gstin
-            FROM quotations q
-            JOIN customers c ON c.id = q.customer_id
-            WHERE q.id = $1
-        `,
-            [req.params.id],
+            `SELECT q.*, c.name AS customer_name,
+                    c.address AS customer_address,
+                    c.gstin AS customer_gstin
+             FROM quotations q
+             JOIN customers c ON c.id = q.customer_id
+             WHERE q.id = $1 AND q.user_id = $2`,
+            [req.params.id, req.userId],
         );
         if (!qRows.length)
             return res.status(404).json({ error: "Quotation not found" });
 
         const { rows: items } = await pool.query(
-            `SELECT * FROM line_items WHERE quotation_id = $1 ORDER BY id`,
+            "SELECT * FROM line_items WHERE quotation_id = $1 ORDER BY id",
             [req.params.id],
         );
         res.json({ data: { ...qRows[0], line_items: items } });
@@ -62,7 +64,6 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-// POST /quotations
 router.post("/", async (req, res) => {
     const {
         customer_id,
@@ -87,11 +88,12 @@ router.post("/", async (req, res) => {
 
     try {
         await client.query("BEGIN");
+
         const { rows } = await client.query(
             `INSERT INTO quotations
              (customer_id, quote_number, status, total_amount,
-              quote_date, attention, subject, valid_until, notes)
-             VALUES ($1,$2,'draft',$3,$4,$5,$6,$7,$8)
+              quote_date, attention, subject, valid_until, notes, user_id)
+             VALUES ($1,$2,'draft',$3,$4,$5,$6,$7,$8,$9)
              RETURNING *`,
             [
                 customer_id,
@@ -102,6 +104,7 @@ router.post("/", async (req, res) => {
                 subject || null,
                 valid_until || null,
                 notes || null,
+                req.userId,
             ],
         );
         const quotation = rows[0];
@@ -133,7 +136,6 @@ router.post("/", async (req, res) => {
     }
 });
 
-// PUT /quotations/:id/status
 router.put("/:id/status", async (req, res) => {
     const { status } = req.body;
     const allowed = ["draft", "sent", "accepted", "rejected"];
@@ -144,8 +146,9 @@ router.put("/:id/status", async (req, res) => {
 
     try {
         const { rows } = await pool.query(
-            `UPDATE quotations SET status = $1 WHERE id = $2 RETURNING *`,
-            [status, req.params.id],
+            `UPDATE quotations SET status=$1
+             WHERE id=$2 AND user_id=$3 RETURNING *`,
+            [status, req.params.id, req.userId],
         );
         if (!rows.length)
             return res.status(404).json({ error: "Quotation not found" });
@@ -155,18 +158,15 @@ router.put("/:id/status", async (req, res) => {
     }
 });
 
-// GET /quotations/:id/pdf
 router.get("/:id/pdf", async (req, res) => {
     const client = await pool.connect();
     try {
         const { rows: qRows } = await client.query(
-            `
-            SELECT q.*, c.name, c.address, c.gstin
-            FROM quotations q
-            JOIN customers c ON c.id = q.customer_id
-            WHERE q.id = $1
-        `,
-            [req.params.id],
+            `SELECT q.*, c.name, c.address, c.gstin
+             FROM quotations q
+             JOIN customers c ON c.id = q.customer_id
+             WHERE q.id = $1 AND q.user_id = $2`,
+            [req.params.id, req.userId],
         );
         if (!qRows.length)
             return res.status(404).json({ error: "Quotation not found" });
@@ -177,7 +177,8 @@ router.get("/:id/pdf", async (req, res) => {
         );
 
         const { rows: profileRows } = await client.query(
-            "SELECT * FROM workshop_profile LIMIT 1",
+            "SELECT * FROM workshop_profile WHERE user_id = $1 LIMIT 1",
+            [req.userId],
         );
         if (!profileRows.length)
             return res

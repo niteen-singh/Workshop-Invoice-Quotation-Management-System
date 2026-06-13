@@ -97,23 +97,39 @@ function fmtDate(d) {
 }
 
 // ── Build data for template ───────────────────────────────
+const MAX_INVOICE_ROWS = 24;
+
 function buildTemplateData(invoice, lineItems, customer, profile) {
-    // per-item taxable amounts
     const subtotal = lineItems.reduce(
         (s, i) => s + parseFloat(i.unit_price) * parseFloat(i.quantity),
         0,
     );
-
-    // derive GST from first item (all items assumed same rate for CGST/SGST split)
-    //const gstPct = parseFloat(lineItems[0]?.gst_percent ?? 18);
     const totalGst = lineItems.reduce((s, i) => {
         const taxable = parseFloat(i.unit_price) * parseFloat(i.quantity);
         return s + (taxable * parseFloat(i.gst_percent)) / 100;
     }, 0);
 
+    const cgstRate = parseFloat(lineItems[0]?.gst_percent ?? 18) / 2;
     const exactTotal = subtotal + totalGst;
     const rounded = Math.round(exactTotal);
-    const roundOff = rounded - exactTotal; // can be +ve or -ve
+    const roundOff = rounded - exactTotal;
+
+    const filledItems = lineItems.map((item, i) => {
+        const taxable = parseFloat(item.unit_price) * parseFloat(item.quantity);
+        return {
+            no: i + 1,
+            description: item.description,
+            hsnCode: item.hsn ?? "",
+            qty: parseFloat(item.quantity),
+            rate: fmt(item.unit_price),
+            total: fmt(taxable),
+        };
+    });
+
+    // pad to MAX_INVOICE_ROWS so layout is consistent
+    const emptyRows = Array(
+        Math.max(0, MAX_INVOICE_ROWS - filledItems.length),
+    ).fill({});
 
     return {
         seller: {
@@ -149,23 +165,15 @@ function buildTemplateData(invoice, lineItems, customer, profile) {
             ifsc: profile.ifsc ?? "",
         },
         shippingDetails: invoice.vehicle_no ?? "",
-        items: lineItems.map((item, i) => {
-            const taxable =
-                parseFloat(item.unit_price) * parseFloat(item.quantity);
-            return {
-                no: i + 1,
-                description: item.description,
-                hsnCode: item.hsn ?? "",
-                qty: parseFloat(item.quantity),
-                rate: fmt(item.unit_price),
-                total: fmt(taxable),
-            };
-        }),
+        items: filledItems,
+        emptyRows: emptyRows,
         totals: {
             subtotal: fmt(subtotal),
+            cgstRate: cgstRate,
+            sgstRate: cgstRate,
             cgst: fmt(totalGst / 2),
             sgst: fmt(totalGst / 2),
-            roundOff: (roundOff >= 0 ? "+" : "") + fmt(roundOff),
+            roundOff: (roundOff >= 0 ? "+" : "") + fmt(Math.abs(roundOff)),
             grandTotal: fmt(rounded),
             grandTotalWords: amountInWords(rounded),
         },
@@ -183,7 +191,7 @@ function renderHTML(data) {
 // ── Puppeteer → PDF buffer ────────────────────────────────
 async function generatePDF(html) {
     const browser = await puppeteer.launch({
-        headless: "true",
+        headless: true,
         args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",

@@ -6,30 +6,21 @@
 
     <nav>
         <small>Main</small>
-
         <ul>
+            <li><a href="/index.html" data-page="dashboard">Dashboard</a></li>
             <li>
-                <a href="/index.html" data-page="dashboard"> Dashboard </a>
-            </li>
-
-            <li>
-                <a href="/customer.html" data-page="customers"> Customers </a>
+                <a href="/customer.html" data-page="customers">Customers</a>
             </li>
         </ul>
 
         <small>Documents</small>
-
         <ul>
             <li>
-                <a href="/quotations.html" data-page="quotations">
-                    Quotations
-                </a>
+                <a href="/quotations.html" data-page="quotations">Quotations</a>
             </li>
-
-            <li>
-                <a href="/invoices.html" data-page="invoices"> Invoices </a>
-            </li>
+            <li><a href="/invoices.html" data-page="invoices">Invoices</a></li>
         </ul>
+
         <small>Account</small>
         <ul>
             <li><a href="/settings.html" data-page="settings">Settings</a></li>
@@ -38,10 +29,23 @@
 
     <footer>
         <div class="user-avatar">NS</div>
-
         <div class="user-meta">
-            <strong>Niteen Singh</strong>
+            <strong id="sidebar-user-name">—</strong>
             <small>Admin</small>
         </div>
+        <button
+            onclick="handleLogout()"
+            style="
+                margin-left: auto;
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--muted);
+                font-size: 1.1rem;
+            "
+            title="Sign out"
+        >
+            ⏻
+        </button>
     </footer>
 </aside>

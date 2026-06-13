@@ -27,6 +27,13 @@ exports.up = (pgm) => {
         account_name: { type: "varchar(255)" },
         terms: { type: "text" },
 
+        user_id: {
+            type: "uuid",
+            references: '"users"',
+            onDelete: "CASCADE",
+            unique: true,
+        },
+
         created_at: { type: "timestamptz", default: pgm.func("now()") },
         updated_at: { type: "timestamptz", default: pgm.func("now()") },
     });

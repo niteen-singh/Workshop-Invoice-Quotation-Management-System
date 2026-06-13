@@ -4,90 +4,64 @@ const { buildTemplateData, renderHTML, generatePDF } = require("../lib/pdf");
 
 const router = Router();
 
-router.put("/:id/status", async (req, res) => {
-    const { status } = req.body;
-    const allowed = ["unpaid", "paid", "overdue", "cancelled", "draft"];
-
-    if (!allowed.includes(status))
-        return res
-            .status(400)
-            .json({ error: `Status must be one of: ${allowed.join(", ")}` });
-
+// GET /invoices/next-number
+router.get("/next-number", async (req, res) => {
     try {
         const { rows } = await pool.query(
-            `UPDATE invoices SET
-                status  = $1,
-                paid_at = $2
-             WHERE id = $3 RETURNING *`,
-            [status, status === "paid" ? new Date() : null, req.params.id],
-        );
-        if (!rows.length)
-            return res.status(404).json({ error: "Invoice not found" });
-        res.json({ data: rows[0] });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// ── GET /invoices/next-number ─────────────────────────────
-router.get("/next-number", async (_req, res) => {
-    try {
-        const { rows } = await pool.query(
-            `SELECT invoice_number FROM invoices ORDER BY created_at DESC LIMIT 1`,
+            `SELECT invoice_number FROM invoices
+             WHERE user_id = $1
+             ORDER BY created_at DESC LIMIT 1`,
+            [req.userId],
         );
         if (!rows.length) return res.json({ number: "INV-001" });
-
-        const last = rows[0].invoice_number;
-        const num = parseInt(last.replace(/\D/g, "")) + 1;
+        const num = parseInt(rows[0].invoice_number.replace(/\D/g, "")) + 1;
         res.json({ number: `INV-${String(num).padStart(3, "0")}` });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// ── GET /invoices ─────────────────────────────────────────
-router.get("/", async (_req, res) => {
+// GET /invoices
+router.get("/", async (req, res) => {
     try {
-        const { rows } = await pool.query(`
-            SELECT i.*, c.name AS customer_name
-            FROM invoices i
-            JOIN customers c ON c.id = i.customer_id
-            ORDER BY i.created_at DESC
-        `);
+        const { rows } = await pool.query(
+            `SELECT i.*, c.name AS customer_name
+             FROM invoices i
+             JOIN customers c ON c.id = i.customer_id
+             WHERE i.user_id = $1
+             ORDER BY i.created_at DESC`,
+            [req.userId],
+        );
         res.json({ data: rows, count: rows.length });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// ── GET /invoices/:id ─────────────────────────────────────
+// GET /invoices/:id
 router.get("/:id", async (req, res) => {
     try {
         const { rows: invRows } = await pool.query(
-            `
-            SELECT i.*, c.name AS customer_name, c.address, c.gstin
-            FROM invoices i
-            JOIN customers c ON c.id = i.customer_id
-            WHERE i.id = $1
-        `,
-            [req.params.id],
+            `SELECT i.*, c.name AS customer_name, c.address, c.gstin
+             FROM invoices i
+             JOIN customers c ON c.id = i.customer_id
+             WHERE i.id = $1 AND i.user_id = $2`,
+            [req.params.id, req.userId],
         );
-
         if (!invRows.length)
             return res.status(404).json({ error: "Invoice not found" });
 
         const { rows: items } = await pool.query(
-            `SELECT * FROM line_items WHERE invoice_id = $1 ORDER BY id`,
+            "SELECT * FROM line_items WHERE invoice_id = $1 ORDER BY id",
             [req.params.id],
         );
-
         res.json({ data: { ...invRows[0], line_items: items } });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// ── POST /invoices ────────────────────────────────────────
+// POST /invoices
 router.post("/", async (req, res) => {
     const {
         customer_id,
@@ -105,9 +79,11 @@ router.post("/", async (req, res) => {
     } = req.body;
 
     if (!customer_id || !invoice_number || !line_items?.length)
-        return res.status(400).json({
-            error: "customer_id, invoice_number and line_items required",
-        });
+        return res
+            .status(400)
+            .json({
+                error: "customer_id, invoice_number and line_items required",
+            });
 
     const total_amount = line_items.reduce((s, i) => s + Number(i.total), 0);
     const client = await pool.connect();
@@ -119,8 +95,9 @@ router.post("/", async (req, res) => {
             `INSERT INTO invoices
              (customer_id, invoice_number, status, total_amount,
               invoice_date, due_date, notes,
-              challan_no, challan_date, po_no, po_date, vendor_code, vehicle_no)
-             VALUES ($1,$2,'unpaid',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+              challan_no, challan_date, po_no, po_date,
+              vendor_code, vehicle_no, user_id)
+             VALUES ($1,$2,'unpaid',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
              RETURNING *`,
             [
                 customer_id,
@@ -135,6 +112,7 @@ router.post("/", async (req, res) => {
                 po_date || null,
                 vendor_code || null,
                 vehicle_no || null,
+                req.userId,
             ],
         );
         const invoice = rows[0];
@@ -166,7 +144,36 @@ router.post("/", async (req, res) => {
     }
 });
 
-// ── GET /invoices/:id/pdf ─────────────────────────────────
+// PUT /invoices/:id/status
+router.put("/:id/status", async (req, res) => {
+    const { status } = req.body;
+    const allowed = ["unpaid", "paid", "overdue", "cancelled", "draft"];
+    if (!allowed.includes(status))
+        return res
+            .status(400)
+            .json({ error: `Status must be one of: ${allowed.join(", ")}` });
+
+    try {
+        const { rows } = await pool.query(
+            `UPDATE invoices SET
+               status=$1, paid_at=$2
+             WHERE id=$3 AND user_id=$4 RETURNING *`,
+            [
+                status,
+                status === "paid" ? new Date() : null,
+                req.params.id,
+                req.userId,
+            ],
+        );
+        if (!rows.length)
+            return res.status(404).json({ error: "Invoice not found" });
+        res.json({ data: rows[0] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /invoices/:id/pdf
 router.get("/:id/pdf", async (req, res) => {
     const client = await pool.connect();
     try {
@@ -174,8 +181,8 @@ router.get("/:id/pdf", async (req, res) => {
             `SELECT i.*, c.name, c.address, c.gstin
              FROM invoices i
              JOIN customers c ON c.id = i.customer_id
-             WHERE i.id = $1`,
-            [req.params.id],
+             WHERE i.id = $1 AND i.user_id = $2`,
+            [req.params.id, req.userId],
         );
         if (!invRows.length)
             return res.status(404).json({ error: "Invoice not found" });
@@ -188,12 +195,13 @@ router.get("/:id/pdf", async (req, res) => {
             return res.status(400).json({ error: "Invoice has no line items" });
 
         const { rows: profileRows } = await client.query(
-            "SELECT * FROM workshop_profile LIMIT 1",
+            "SELECT * FROM workshop_profile WHERE user_id = $1 LIMIT 1",
+            [req.userId],
         );
         if (!profileRows.length)
-            return res.status(400).json({
-                error: "Workshop profile not set up. Go to Settings first.",
-            });
+            return res
+                .status(400)
+                .json({ error: "Workshop profile not set up." });
 
         const invoice = invRows[0];
         const customer = {
