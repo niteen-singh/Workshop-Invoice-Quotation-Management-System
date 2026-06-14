@@ -16,6 +16,15 @@
                     <a href="/quotations.html" role="button" class="secondary"
                         >← Back</a
                     >
+                    <button
+                        id="edit-btn"
+                        onclick="
+                            window.location.href =
+                                '/quotations-edit.html?id=' + quoteId
+                        "
+                    >
+                        Edit
+                    </button>
                     <button id="status-btn" onclick="cycleStatus()">
                         Mark as sent
                     </button>

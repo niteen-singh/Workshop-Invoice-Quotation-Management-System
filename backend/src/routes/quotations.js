@@ -77,11 +77,9 @@ router.post("/", async (req, res) => {
     } = req.body;
 
     if (!customer_id || !quote_number || !line_items?.length)
-        return res
-            .status(400)
-            .json({
-                error: "customer_id, quote_number and line_items required",
-            });
+        return res.status(400).json({
+            error: "customer_id, quote_number and line_items required",
+        });
 
     const total_amount = line_items.reduce((s, i) => s + Number(i.total), 0);
     const client = await pool.connect();
@@ -128,6 +126,92 @@ router.post("/", async (req, res) => {
 
         await client.query("COMMIT");
         res.status(201).json({ data: quotation });
+    } catch (err) {
+        await client.query("ROLLBACK");
+        res.status(500).json({ error: err.message });
+    } finally {
+        client.release();
+    }
+});
+
+router.put("/:id", async (req, res) => {
+    const {
+        customer_id,
+        quote_number,
+        quote_date,
+        attention,
+        subject,
+        valid_until,
+        notes,
+        line_items,
+    } = req.body;
+
+    if (!customer_id || !quote_number || !line_items?.length)
+        return res
+            .status(400)
+            .json({
+                error: "customer_id, quote_number and line_items required",
+            });
+
+    const total_amount = line_items.reduce((s, i) => s + Number(i.total), 0);
+    const client = await pool.connect();
+
+    try {
+        await client.query("BEGIN");
+
+        const { rows: check } = await client.query(
+            "SELECT id FROM quotations WHERE id=$1 AND user_id=$2",
+            [req.params.id, req.userId],
+        );
+        if (!check.length) {
+            await client.query("ROLLBACK");
+            return res.status(404).json({ error: "Quotation not found" });
+        }
+
+        const { rows } = await client.query(
+            `UPDATE quotations SET
+               customer_id=$1,  quote_number=$2,
+               total_amount=$3, quote_date=$4,
+               attention=$5,    subject=$6,
+               valid_until=$7,  notes=$8
+             WHERE id=$9 AND user_id=$10 RETURNING *`,
+            [
+                customer_id,
+                quote_number,
+                total_amount,
+                quote_date || null,
+                attention || null,
+                subject || null,
+                valid_until || null,
+                notes || null,
+                req.params.id,
+                req.userId,
+            ],
+        );
+
+        await client.query("DELETE FROM line_items WHERE quotation_id=$1", [
+            req.params.id,
+        ]);
+
+        for (const item of line_items) {
+            await client.query(
+                `INSERT INTO line_items
+                 (quotation_id, description, hsn, gst_percent, quantity, unit_price, total)
+                 VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+                [
+                    req.params.id,
+                    item.description,
+                    item.hsn || null,
+                    item.gst_percent || 0,
+                    item.quantity,
+                    item.unit_price,
+                    item.total,
+                ],
+            );
+        }
+
+        await client.query("COMMIT");
+        res.json({ data: rows[0] });
     } catch (err) {
         await client.query("ROLLBACK");
         res.status(500).json({ error: err.message });

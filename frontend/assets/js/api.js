@@ -1,28 +1,6 @@
-// const BASE = "/api"; // nginx proxies /api → backend:8000
-
-// async function request(method, path, body) {
-//     const res = await fetch(`${BASE}${path}`, {
-//         method,
-//         headers: { "Content-Type": "application/json" },
-//         body: body ? JSON.stringify(body) : undefined,
-//     });
-
-//     const data = await res.json();
-//     if (!res.ok) throw new Error(data.error ?? "Request failed");
-//     return data;
-// }
-
-// const api = {
-//     get: (path) => request("GET", path),
-//     post: (path, body) => request("POST", path, body),
-//     put: (path, body) => request("PUT", path, body),
-//     delete: (path) => request("DELETE", path),
-// };
-
 const BASE = "/api";
 
 async function request(method, path, body) {
-    // append timestamp to GET requests to prevent 304 caching
     const url =
         method === "GET"
             ? `${BASE}${path}${path.includes("?") ? "&" : "?"}_=${Date.now()}`
@@ -36,6 +14,20 @@ async function request(method, path, body) {
         },
         body: body ? JSON.stringify(body) : undefined,
     });
+
+    // ── Global 401 handler ────────────────────────────────
+    // If token expired or missing mid-session, redirect to login
+    // Skip redirect if we're already on an auth page
+    if (res.status === 401) {
+        const authPages = ["/login.html", "/signup.html"];
+        const isAuthPage = authPages.some((p) =>
+            window.location.pathname.endsWith(p),
+        );
+        if (!isAuthPage) {
+            window.location.href = "/login.html";
+            return;
+        }
+    }
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? "Request failed");

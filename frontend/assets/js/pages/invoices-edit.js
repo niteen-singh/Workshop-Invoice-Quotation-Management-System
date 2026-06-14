@@ -1,24 +1,17 @@
+const params = new URLSearchParams(window.location.search);
+const invoiceId = params.get("id");
 const GST_RATES = [0, 5, 12, 18, 28];
+const MAX_ROWS = 24;
 let rowId = 0;
 
-// ── Init ──────────────────────────────────────────────────
+if (!invoiceId) window.location.href = "/invoices.html";
+
 document.addEventListener("DOMContentLoaded", async () => {
-    setDefaultDates();
     await loadCustomers();
-    await setNextInvoiceNumber();
-    addRow();
-    addRow();
+    await loadInvoice();
 });
 
-// ── Dates ─────────────────────────────────────────────────
-function setDefaultDates() {
-    const today = new Date().toISOString().split("T")[0];
-    const due = new Date(Date.now() + 30 * 864e5).toISOString().split("T")[0];
-    document.getElementById("invoice-date").value = today;
-    document.getElementById("due-date").value = due;
-}
-
-// ── Customers dropdown ────────────────────────────────────
+// ── Load customers dropdown ───────────────────────────────
 async function loadCustomers() {
     const sel = document.getElementById("customer-select");
     try {
@@ -31,28 +24,72 @@ async function loadCustomers() {
             sel.appendChild(opt);
         });
     } catch (err) {
-        sel.innerHTML = '<option value="">Failed to load customers</option>';
+        sel.innerHTML = '<option value="">Failed to load</option>';
     }
 }
 
-// ── Auto invoice number ───────────────────────────────────
-async function setNextInvoiceNumber() {
+// ── Load existing invoice data ────────────────────────────
+async function loadInvoice() {
     try {
-        const res = await api.get("/invoices/next-number");
-        document.getElementById("invoice-number").value = res.number;
-    } catch {
-        document.getElementById("invoice-number").value = "INV-001";
+        const res = await api.get(`/invoices/${invoiceId}`);
+        const invoice = res.data;
+
+        document.title = `Edit ${invoice.invoice_number} — Workshop IQ`;
+        document.getElementById("topbar-title").textContent =
+            `Edit ${invoice.invoice_number}`;
+
+        // fill mandatory fields
+        document.getElementById("customer-select").value = invoice.customer_id;
+        document.getElementById("invoice-number").value =
+            invoice.invoice_number;
+        document.getElementById("invoice-date").value = toDateInput(
+            invoice.invoice_date,
+        );
+        document.getElementById("due-date").value = toDateInput(
+            invoice.due_date,
+        );
+        document.getElementById("notes").value = invoice.notes ?? "";
+
+        // fill optional fields
+        if (
+            invoice.challan_no ||
+            invoice.po_no ||
+            invoice.vendor_code ||
+            invoice.vehicle_no
+        ) {
+            document
+                .querySelector(".optional-section")
+                .setAttribute("open", "");
+        }
+        document.getElementById("challan_no").value = invoice.challan_no ?? "";
+        document.getElementById("challan_date").value = toDateInput(
+            invoice.challan_date,
+        );
+        document.getElementById("po_no").value = invoice.po_no ?? "";
+        document.getElementById("po_date").value = toDateInput(invoice.po_date);
+        document.getElementById("vendor_code").value =
+            invoice.vendor_code ?? "";
+        document.getElementById("vehicle_no").value = invoice.vehicle_no ?? "";
+
+        // fill line items
+        const items = invoice.line_items ?? [];
+        items.forEach((item) => addRow(item));
+    } catch (err) {
+        alert("Failed to load invoice: " + err.message);
+        window.location.href = "/invoices.html";
     }
+}
+
+function toDateInput(d) {
+    if (!d) return "";
+    return new Date(d).toISOString().split("T")[0];
 }
 
 // ── Row management ────────────────────────────────────────
-const MAX_ROWS = 24;
-
-function addRow() {
+function addRow(prefill = null) {
     const body = document.getElementById("line-items-body");
-
     if (body.rows.length >= MAX_ROWS) {
-        alert(`Maximum ${MAX_ROWS} line items per invoice to fit on one page.`);
+        alert(`Maximum ${MAX_ROWS} line items per invoice.`);
         return;
     }
 
@@ -62,21 +99,36 @@ function addRow() {
     tr.id = "row-" + id;
 
     tr.innerHTML = `
-        <td style="text-align:center;color:var(--muted);font-size:0.85rem" class="row-idx"></td>
-        <td><input type="text" placeholder="e.g. Lathe work – MS shaft" oninput="recalc()" /></td>
-        <td><input type="text" placeholder="8466" style="font-family:monospace" /></td>
+        <td style="text-align:center;color:var(--muted);font-size:0.85rem"
+            class="row-idx"></td>
+        <td><input type="text"
+                   value="${prefill?.description ?? ""}"
+                   placeholder="e.g. Lathe work – MS shaft"
+                   oninput="recalc()" /></td>
+        <td><input type="text"
+                   value="${prefill?.hsn ?? ""}"
+                   placeholder="8466"
+                   style="font-family:monospace" /></td>
         <td>
             <select onchange="recalc()">
                 ${GST_RATES.map(
-                    (r) =>
-                        `<option value="${r}" ${r === 18 ? "selected" : ""}>${r}%</option>`,
+                    (r) => `
+                    <option value="${r}"
+                        ${parseFloat(prefill?.gst_percent) === r ? "selected" : ""}>
+                        ${r}%
+                    </option>`,
                 ).join("")}
             </select>
         </td>
-        <td><input type="number" min="0" step="0.01" value="1"
-                   style="text-align:right" oninput="recalc()" /></td>
-        <td><input type="number" min="0" step="0.01" placeholder="0.00"
-                   style="text-align:right" oninput="recalc()" /></td>
+        <td><input type="number" min="0" step="0.01"
+                   value="${prefill?.quantity ?? 1}"
+                   style="text-align:right"
+                   oninput="recalc()" /></td>
+        <td><input type="number" min="0" step="0.01"
+                   value="${prefill?.unit_price ?? ""}"
+                   placeholder="0.00"
+                   style="text-align:right"
+                   oninput="recalc()" /></td>
         <td class="row-total" id="row-total-${id}">₹0.00</td>
         <td style="text-align:center">
             <button onclick="removeRow(${id})"
@@ -84,7 +136,7 @@ function addRow() {
                            color:var(--muted);font-size:1.1rem;padding:0.2rem 0.5rem"
                     onmouseover="this.style.color='#f09a9a'"
                     onmouseout="this.style.color='var(--muted)'"
-                    aria-label="Remove row">✕</button>
+                    aria-label="Remove">✕</button>
         </td>
     `;
     body.appendChild(tr);
@@ -126,15 +178,14 @@ function recalc() {
         const gstPct = parseFloat(tr.querySelector("select")?.value) || 0;
         const qty = parseFloat(inputs[2]?.value) || 0;
         const rate = parseFloat(inputs[3]?.value) || 0;
-
         const taxable = qty * rate;
         const gstAmt = (taxable * gstPct) / 100;
-
         subtotal += taxable;
         totalGst += gstAmt;
 
-        const id = tr.id.replace("row-", "");
-        const cell = document.getElementById("row-total-" + id);
+        const cell = document.getElementById(
+            "row-total-" + tr.id.replace("row-", ""),
+        );
         if (cell) cell.textContent = fmt(taxable + gstAmt);
     });
 
@@ -185,7 +236,6 @@ function collectLineItems() {
     return { items, valid };
 }
 
-// ── Helper: get value or null ─────────────────────────────
 function val(id) {
     return document.getElementById(id)?.value.trim() || null;
 }
@@ -210,7 +260,7 @@ async function saveInvoice() {
     btn.disabled = true;
 
     try {
-        await api.post("/invoices", {
+        await api.put(`/invoices/${invoiceId}`, {
             customer_id,
             invoice_number,
             invoice_date,
@@ -224,21 +274,11 @@ async function saveInvoice() {
             notes: val("notes"),
             line_items: items,
         });
-        window.location.href = "/invoices.html";
+        window.location.href = `/invoices-view.html?id=${invoiceId}`;
     } catch (err) {
         alert("Failed to save: " + err.message);
     } finally {
         btn.removeAttribute("aria-busy");
         btn.disabled = false;
     }
-}
-
-// ── PDF preview ───────────────────────────────────────────
-async function previewPdf() {
-    const { items } = collectLineItems();
-    if (!items.length)
-        return alert("Add at least one line item before previewing.");
-    alert(
-        "Save the invoice first, then use the PDF button on the invoice view page.",
-    );
 }

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Edit Invoice — Workshop IQ</title>
+        <link rel="stylesheet" href="/assets/css/app.css" />
+    </head>
+    <body>
+        <div id="sidebar-placeholder"></div>
+
+        <div id="main">
+            <div id="topbar">
+                <h4 id="topbar-title">Edit Invoice</h4>
+                <div class="actions">
+                    <a href="/invoices.html" role="button" class="secondary"
+                        >Cancel</a
+                    >
+                    <button onclick="saveInvoice()" id="save-btn">
+                        Save changes
+                    </button>
+                </div>
+            </div>
+
+            <div id="content">
+                <div class="form-section">
+                    <div class="form-section-title">Invoice details</div>
+                    <div class="invoice-meta-grid">
+                        <div class="field-group">
+                            <label class="field-label">Customer *</label>
+                            <select id="customer-select">
+                                <option value="">Loading…</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Invoice # *</label>
+                            <input type="text" id="invoice-number" />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Invoice date *</label>
+                            <input type="date" id="invoice-date" />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Due date</label>
+                            <input type="date" id="due-date" />
+                        </div>
+                    </div>
+                </div>
+
+                <details class="form-section optional-section">
+                    <summary>
+                        Optional fields
+                        <span class="optional-hint"
+                            >Challan · PO · Vendor code · Vehicle no</span
+                        >
+                    </summary>
+                    <div class="invoice-meta-grid" style="margin-top: 1rem">
+                        <div class="field-group">
+                            <label class="field-label">Challan No.</label>
+                            <input type="text" id="challan_no" />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Challan date</label>
+                            <input type="date" id="challan_date" />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">P.O. No.</label>
+                            <input type="text" id="po_no" />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">P.O. date</label>
+                            <input type="date" id="po_date" />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Vendor code</label>
+                            <input type="text" id="vendor_code" />
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Vehicle No.</label>
+                            <input type="text" id="vehicle_no" />
+                        </div>
+                    </div>
+                </details>
+
+                <div class="form-section">
+                    <div class="form-section-title">Line items</div>
+                    <div
+                        style="
+                            overflow-x: auto;
+                            border: 1px solid var(--border);
+                            border-radius: 16px;
+                        "
+                    >
+                        <table class="line-items-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 36px; text-align: center">
+                                        #
+                                    </th>
+                                    <th>Description / name</th>
+                                    <th style="width: 110px">HSN code</th>
+                                    <th style="width: 100px">GST %</th>
+                                    <th style="width: 80px">Qty</th>
+                                    <th style="width: 120px">Rate (₹)</th>
+                                    <th style="width: 110px; text-align: right">
+                                        Total (₹)
+                                    </th>
+                                    <th style="width: 40px"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="line-items-body"></tbody>
+                        </table>
+                        <button onclick="addRow()" class="add-row-btn">
+                            + Add row
+                            <span
+                                id="row-counter"
+                                style="
+                                    margin-left: auto;
+                                    color: var(--muted);
+                                    font-size: 0.8rem;
+                                "
+                            >
+                                0 / 22
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <div
+                    style="
+                        display: flex;
+                        justify-content: flex-end;
+                        margin-bottom: 1.5rem;
+                    "
+                >
+                    <table class="totals-table">
+                        <tr>
+                            <td>Subtotal</td>
+                            <td id="t-subtotal">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>CGST</td>
+                            <td id="t-cgst">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>SGST</td>
+                            <td id="t-sgst">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Round off</td>
+                            <td id="t-roundoff">₹0.00</td>
+                        </tr>
+                        <tr class="grand-row">
+                            <td><strong>Grand total</strong></td>
+                            <td id="t-grand"><strong>₹0.00</strong></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="form-section">
+                    <div class="field-group">
+                        <label class="field-label">Notes / terms</label>
+                        <input
+                            type="text"
+                            id="notes"
+                            placeholder="Payment terms, bank details…"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="/assets/js/api.js"></script>
+        <script src="/assets/js/layout.js"></script>
+        <script src="/assets/js/pages/invoices-edit.js"></script>
+        <script>
+            loadSidebar("invoices");
+        </script>
+    </body>
+</html>

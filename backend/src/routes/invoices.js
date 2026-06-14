@@ -79,11 +79,9 @@ router.post("/", async (req, res) => {
     } = req.body;
 
     if (!customer_id || !invoice_number || !line_items?.length)
-        return res
-            .status(400)
-            .json({
-                error: "customer_id, invoice_number and line_items required",
-            });
+        return res.status(400).json({
+            error: "customer_id, invoice_number and line_items required",
+        });
 
     const total_amount = line_items.reduce((s, i) => s + Number(i.total), 0);
     const client = await pool.connect();
@@ -144,32 +142,103 @@ router.post("/", async (req, res) => {
     }
 });
 
-// PUT /invoices/:id/status
-router.put("/:id/status", async (req, res) => {
-    const { status } = req.body;
-    const allowed = ["unpaid", "paid", "overdue", "cancelled", "draft"];
-    if (!allowed.includes(status))
+// PUT /invoices/:id — update invoice + replace line items
+router.put("/:id", async (req, res) => {
+    const {
+        customer_id,
+        invoice_number,
+        invoice_date,
+        due_date,
+        notes,
+        line_items,
+        challan_no,
+        challan_date,
+        po_no,
+        po_date,
+        vendor_code,
+        vehicle_no,
+    } = req.body;
+
+    if (!customer_id || !invoice_number || !line_items?.length)
         return res
             .status(400)
-            .json({ error: `Status must be one of: ${allowed.join(", ")}` });
+            .json({
+                error: "customer_id, invoice_number and line_items required",
+            });
+
+    const total_amount = line_items.reduce((s, i) => s + Number(i.total), 0);
+    const client = await pool.connect();
 
     try {
-        const { rows } = await pool.query(
+        await client.query("BEGIN");
+
+        // verify invoice belongs to this user
+        const { rows: check } = await client.query(
+            "SELECT id FROM invoices WHERE id=$1 AND user_id=$2",
+            [req.params.id, req.userId],
+        );
+        if (!check.length) {
+            await client.query("ROLLBACK");
+            return res.status(404).json({ error: "Invoice not found" });
+        }
+
+        // update invoice
+        const { rows } = await client.query(
             `UPDATE invoices SET
-               status=$1, paid_at=$2
-             WHERE id=$3 AND user_id=$4 RETURNING *`,
+               customer_id=$1,    invoice_number=$2,
+               total_amount=$3,   invoice_date=$4,
+               due_date=$5,       notes=$6,
+               challan_no=$7,     challan_date=$8,
+               po_no=$9,          po_date=$10,
+               vendor_code=$11,   vehicle_no=$12
+             WHERE id=$13 AND user_id=$14 RETURNING *`,
             [
-                status,
-                status === "paid" ? new Date() : null,
+                customer_id,
+                invoice_number,
+                total_amount,
+                invoice_date || null,
+                due_date || null,
+                notes || null,
+                challan_no || null,
+                challan_date || null,
+                po_no || null,
+                po_date || null,
+                vendor_code || null,
+                vehicle_no || null,
                 req.params.id,
                 req.userId,
             ],
         );
-        if (!rows.length)
-            return res.status(404).json({ error: "Invoice not found" });
+
+        // delete old line items and re-insert
+        await client.query("DELETE FROM line_items WHERE invoice_id=$1", [
+            req.params.id,
+        ]);
+
+        for (const item of line_items) {
+            await client.query(
+                `INSERT INTO line_items
+                 (invoice_id, description, hsn, gst_percent, quantity, unit_price, total)
+                 VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+                [
+                    req.params.id,
+                    item.description,
+                    item.hsn || null,
+                    item.gst_percent,
+                    item.quantity,
+                    item.unit_price,
+                    item.total,
+                ],
+            );
+        }
+
+        await client.query("COMMIT");
         res.json({ data: rows[0] });
     } catch (err) {
+        await client.query("ROLLBACK");
         res.status(500).json({ error: err.message });
+    } finally {
+        client.release();
     }
 });
 

@@ -55,6 +55,10 @@ function renderInvoice(inv) {
     document.title = `${inv.invoice_number} — Workshop IQ`;
     document.getElementById("topbar-title").textContent = inv.invoice_number;
 
+    document.getElementById("edit-btn").onclick = () => {
+        window.location.href = `/invoices-edit.html?id=${invoiceId}`;
+    };
+
     // Meta
     document.getElementById("v-customer").textContent =
         inv.customer_name ?? "—";

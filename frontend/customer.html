@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -105,6 +105,84 @@
                     </button>
                     <button type="submit" form="customer-form" id="save-btn">
                         Save customer
+                    </button>
+                </footer>
+            </article>
+        </dialog>
+
+        <!-- Edit Customer Modal -->
+        <dialog id="customer-edit-modal">
+            <article>
+                <header>
+                    <button
+                        aria-label="Close"
+                        rel="prev"
+                        onclick="closeEditModal()"
+                    ></button>
+                    <h5>Edit customer</h5>
+                </header>
+
+                <form id="customer-edit-form" onsubmit="submitEdit(event)">
+                    <label
+                        >Name *
+                        <input
+                            id="edit-name"
+                            name="name"
+                            required
+                            placeholder="e.g. Patil Engineering"
+                        />
+                    </label>
+                    <label
+                        >Phone
+                        <input
+                            id="edit-phone"
+                            name="phone"
+                            placeholder="98765 43210"
+                        />
+                    </label>
+                    <label
+                        >Email
+                        <input
+                            id="edit-email"
+                            name="email"
+                            type="email"
+                            placeholder="contact@example.com"
+                        />
+                    </label>
+                    <label
+                        >GSTIN
+                        <input
+                            id="edit-gstin"
+                            name="gstin"
+                            placeholder="27AABCP1234A1Z5"
+                            style="font-family: monospace"
+                        />
+                    </label>
+                    <label
+                        >Address
+                        <textarea
+                            id="edit-address"
+                            name="address"
+                            rows="2"
+                            placeholder="Shop / unit address"
+                        ></textarea>
+                    </label>
+                </form>
+
+                <footer>
+                    <button
+                        type="submit"
+                        form="customer-edit-form"
+                        id="edit-save-btn"
+                    >
+                        Save changes
+                    </button>
+                    <button
+                        class="secondary"
+                        onclick="closeEditModal()"
+                        style="margin-bottom: 12px"
+                    >
+                        Cancel
                     </button>
                 </footer>
             </article>
