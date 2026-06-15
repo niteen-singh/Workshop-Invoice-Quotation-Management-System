@@ -118,6 +118,13 @@ function renderQuotation(q) {
         document.getElementById("notes-section").style.display = "block";
         document.getElementById("v-notes").textContent = q.notes;
     }
+
+    const convertBtn = document.getElementById("convert-btn");
+    if (convertBtn) {
+        convertBtn.style.display = ["accepted", "rejected"].includes(q.status)
+            ? "none"
+            : "";
+    }
 }
 
 // ── Cycle status ──────────────────────────────────────────
@@ -156,6 +163,80 @@ async function downloadPdf() {
         URL.revokeObjectURL(url);
     } catch (err) {
         alert("PDF failed: " + err.message);
+    } finally {
+        btn.removeAttribute("aria-busy");
+        btn.disabled = false;
+    }
+}
+
+// ── Add these to the existing file ───────────────────────
+
+function openConvertModal() {
+    if (!currentQuote) return;
+
+    // only allow converting draft or sent quotations
+    if (["accepted", "rejected"].includes(currentQuote.status)) {
+        alert(
+            `This quotation is already ${currentQuote.status} and cannot be converted again.`,
+        );
+        return;
+    }
+
+    // set default dates
+    const today = new Date().toISOString().split("T")[0];
+    const due = new Date(Date.now() + 30 * 864e5).toISOString().split("T")[0];
+    document.getElementById("convert-invoice-date").value = today;
+    document.getElementById("convert-due-date").value = due;
+    document.getElementById("convert-vehicle-no").value = "";
+
+    document.getElementById("convert-modal").showModal();
+}
+
+function closeConvertModal() {
+    document.getElementById("convert-modal").close();
+}
+
+async function convertToInvoice() {
+    const btn = document.getElementById("convert-confirm-btn");
+
+    const invoice_date = document.getElementById("convert-invoice-date").value;
+    const due_date = document.getElementById("convert-due-date").value;
+    const vehicle_no = document
+        .getElementById("convert-vehicle-no")
+        .value.trim();
+
+    if (!invoice_date) {
+        alert("Invoice date is required.");
+        return;
+    }
+
+    btn.setAttribute("aria-busy", "true");
+    btn.disabled = true;
+
+    try {
+        const res = await api.post(`/quotations/${quoteId}/convert`, {
+            invoice_date,
+            due_date: due_date || null,
+            vehicle_no: vehicle_no || null,
+        });
+
+        closeConvertModal();
+
+        const { invoice_number, invoice } = res.data;
+
+        // show success then go to the new invoice
+        if (
+            confirm(
+                `✅ ${invoice_number} created successfully!\n\nGo to the new invoice?`,
+            )
+        ) {
+            window.location.href = `/invoices-view.html?id=${invoice.id}`;
+        } else {
+            // refresh to show updated quotation status (now "accepted")
+            window.location.reload();
+        }
+    } catch (err) {
+        alert("Failed to convert: " + err.message);
     } finally {
         btn.removeAttribute("aria-busy");
         btn.disabled = false;

@@ -134,6 +134,113 @@ router.post("/", async (req, res) => {
     }
 });
 
+router.post("/:id/convert", async (req, res) => {
+    const { invoice_date, due_date, vehicle_no } = req.body;
+    const client = await pool.connect();
+
+    try {
+        await client.query("BEGIN");
+
+        // fetch quotation + line items
+        const { rows: qRows } = await client.query(
+            `SELECT q.*, c.name AS customer_name
+             FROM quotations q
+             JOIN customers c ON c.id = q.customer_id
+             WHERE q.id = $1 AND q.user_id = $2`,
+            [req.params.id, req.userId],
+        );
+        if (!qRows.length) {
+            await client.query("ROLLBACK");
+            return res.status(404).json({ error: "Quotation not found" });
+        }
+
+        const { rows: items } = await client.query(
+            "SELECT * FROM line_items WHERE quotation_id = $1 ORDER BY id",
+            [req.params.id],
+        );
+        if (!items.length) {
+            await client.query("ROLLBACK");
+            return res
+                .status(400)
+                .json({ error: "Quotation has no line items" });
+        }
+
+        const quotation = qRows[0];
+
+        // generate next invoice number
+        const { rows: lastInv } = await client.query(
+            `SELECT invoice_number FROM invoices
+             WHERE user_id = $1
+             ORDER BY created_at DESC LIMIT 1`,
+            [req.userId],
+        );
+        const nextNum = lastInv.length
+            ? parseInt(lastInv[0].invoice_number.replace(/\D/g, "")) + 1
+            : 1;
+        const invoice_number = `INV-${String(nextNum).padStart(3, "0")}`;
+
+        // create invoice
+        const { rows: invRows } = await client.query(
+            `INSERT INTO invoices
+             (customer_id, invoice_number, status, total_amount,
+              invoice_date, due_date, vehicle_no,
+              quotation_id, user_id)
+             VALUES ($1,$2,'unpaid',$3,$4,$5,$6,$7,$8)
+             RETURNING *`,
+            [
+                quotation.customer_id,
+                invoice_number,
+                quotation.total_amount,
+                invoice_date || null,
+                due_date || null,
+                vehicle_no || null,
+                quotation.id,
+                req.userId,
+            ],
+        );
+        const invoice = invRows[0];
+
+        // copy line items from quotation to invoice
+        for (const item of items) {
+            await client.query(
+                `INSERT INTO line_items
+                 (invoice_id, description, hsn, gst_percent, quantity, unit_price, total)
+                 VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+                [
+                    invoice.id,
+                    item.description,
+                    item.hsn || null,
+                    item.gst_percent,
+                    item.quantity,
+                    item.unit_price,
+                    item.total,
+                ],
+            );
+        }
+
+        // mark quotation as accepted
+        await client.query(
+            `UPDATE quotations SET status = 'accepted'
+             WHERE id = $1 AND user_id = $2`,
+            [req.params.id, req.userId],
+        );
+
+        await client.query("COMMIT");
+        res.status(201).json({
+            data: {
+                invoice,
+                invoice_number,
+                message: `Invoice ${invoice_number} created from ${quotation.quote_number}`,
+            },
+        });
+    } catch (err) {
+        await client.query("ROLLBACK");
+        res.status(500).json({ error: err.message });
+    } finally {
+        client.release();
+    }
+});
+
 router.put("/:id", async (req, res) => {
     const {
         customer_id,
@@ -147,11 +254,9 @@ router.put("/:id", async (req, res) => {
     } = req.body;
 
     if (!customer_id || !quote_number || !line_items?.length)
-        return res
-            .status(400)
-            .json({
-                error: "customer_id, quote_number and line_items required",
-            });
+        return res.status(400).json({
+            error: "customer_id, quote_number and line_items required",
+        });
 
     const total_amount = line_items.reduce((s, i) => s + Number(i.total), 0);
     const client = await pool.connect();

@@ -25,6 +25,9 @@
                     >
                         Edit
                     </button>
+                    <button id="convert-btn" onclick="openConvertModal()">
+                        → Convert to Invoice
+                    </button>
                     <button id="status-btn" onclick="cycleStatus()">
                         Mark as sent
                     </button>
@@ -203,6 +206,61 @@
                 </div>
             </div>
         </div>
+
+        <!-- Convert to Invoice Modal -->
+        <dialog id="convert-modal">
+            <article>
+                <header>
+                    <button
+                        aria-label="Close"
+                        rel="prev"
+                        onclick="closeConvertModal()"
+                    ></button>
+                    <h5>Convert to Invoice</h5>
+                </header>
+
+                <p
+                    style="
+                        font-size: 0.9rem;
+                        color: var(--muted);
+                        margin-bottom: 1.5rem;
+                    "
+                >
+                    This will create a new invoice with all line items copied
+                    from this quotation. The quotation will be marked as
+                    <strong style="color: white">Accepted</strong>.
+                </p>
+
+                <label>
+                    Invoice date *
+                    <input type="date" id="convert-invoice-date" />
+                </label>
+                <label>
+                    Due date
+                    <input type="date" id="convert-due-date" />
+                </label>
+                <label>
+                    Vehicle No. / Delivery
+                    <input
+                        type="text"
+                        id="convert-vehicle-no"
+                        placeholder="e.g. By Hand / MH12AB1234"
+                    />
+                </label>
+
+                <footer>
+                    <button class="secondary" onclick="closeConvertModal()">
+                        Cancel
+                    </button>
+                    <button
+                        id="convert-confirm-btn"
+                        onclick="convertToInvoice()"
+                    >
+                        Create Invoice
+                    </button>
+                </footer>
+            </article>
+        </dialog>
 
         <script src="/assets/js/api.js"></script>
         <script src="/assets/js/layout.js"></script>
