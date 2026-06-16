@@ -730,6 +730,18 @@ tbody tr:hover {
     padding: 0.8rem 1rem;
 }
 
+/* ── Modal footer buttons ───────────────────────────────── */
+dialog article footer {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+}
+
+dialog article footer button {
+    margin: 0;
+}
+
 /* =========================================================
    Global
 ========================================================= */

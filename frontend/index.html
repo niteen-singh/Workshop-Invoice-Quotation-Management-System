@@ -13,58 +13,147 @@
             <div id="topbar">
                 <h4>Dashboard</h4>
                 <div class="actions">
-                    <a href="/quotations-new.html" role="button" class="outline"
-                        >☐ &nbsp;New Quotation</a
+                    <a
+                        href="/quotations-new.html"
+                        role="button"
+                        class="outline"
                     >
-                    <a href="/invoices-new.html" role="button" class="outline"
-                        >☐ &nbsp;New Invoice</a
-                    >
+                        + New Quotation
+                    </a>
+                    <a href="/invoices-new.html" role="button" class="outline">
+                        + New Invoice
+                    </a>
                 </div>
             </div>
 
             <div id="content">
-                <!-- Stat cards -->
+                <!-- ── Stat cards ── -->
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-label">Total customers</div>
-                        <div class="stat-value" id="stat-customers">—</div>
-                        <div class="stat-sub" id="stat-customers-sub"></div>
+                        <p>Total customers</p>
+                        <h2 id="stat-customers">—</h2>
+                        <small id="stat-customers-sub"></small>
                     </div>
+
                     <div class="stat-card">
-                        <div class="stat-label">Open invoices</div>
-                        <div class="stat-value" id="stat-invoices">—</div>
-                        <div class="stat-sub" id="stat-invoices-sub"></div>
+                        <p>Open invoices</p>
+                        <h2 id="stat-unpaid-amount">—</h2>
+                        <small id="stat-unpaid-sub"></small>
                     </div>
+
                     <div class="stat-card">
-                        <div class="stat-label">Quotations sent</div>
-                        <div class="stat-value" id="stat-quotations">—</div>
-                        <div class="stat-sub" id="stat-quotations-sub"></div>
+                        <p>Collected this month</p>
+                        <h2 id="stat-paid-month">—</h2>
+                        <small id="stat-paid-month-sub"></small>
+                    </div>
+
+                    <div class="stat-card">
+                        <p>Quotations awaiting reply</p>
+                        <h2 id="stat-quotes-sent">—</h2>
+                        <small id="stat-quotes-sub"></small>
+                    </div>
+
+                    <div class="stat-card">
+                        <p>Invoices total</p>
+                        <h2 id="stat-invoices-total">—</h2>
+                        <small id="stat-invoices-sub"></small>
+                    </div>
+
+                    <div class="stat-card">
+                        <p>Quotations accepted</p>
+                        <h2 id="stat-quotes-accepted">—</h2>
+                        <small id="stat-quotes-accepted-sub"></small>
                     </div>
                 </div>
 
-                <!-- Recent invoices table -->
-                <figure>
+                <!-- ── Recent invoices ── -->
+                <div
+                    style="
+                        margin-bottom: 0.75rem;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    "
+                >
+                    <span
+                        style="
+                            font-size: 0.85rem;
+                            color: var(--muted);
+                            font-weight: 500;
+                            text-transform: uppercase;
+                            letter-spacing: 0.06em;
+                        "
+                    >
+                        Recent invoices
+                    </span>
+                    <a
+                        href="/invoices.html"
+                        style="
+                            font-size: 0.82rem;
+                            color: var(--muted);
+                            text-decoration: none;
+                        "
+                    >
+                        View all →
+                    </a>
+                </div>
+
+                <div class="panel">
                     <table>
                         <thead>
                             <tr>
                                 <th>Customer</th>
                                 <th>Invoice #</th>
-                                <th style="text-align: right">Status</th>
+                                <th>Date</th>
+                                <th style="text-align: right">Amount</th>
+                                <th style="text-align: center">Status</th>
                             </tr>
                         </thead>
                         <tbody id="recent-tbody">
                             <tr>
                                 <td
-                                    colspan="3"
-                                    style="text-align: center"
-                                    class="secondary"
+                                    colspan="5"
+                                    style="
+                                        text-align: center;
+                                        color: var(--muted);
+                                    "
                                 >
                                     Loading…
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                </figure>
+                </div>
+
+                <!-- ── Monthly revenue ── -->
+                <div
+                    style="
+                        margin: 1.5rem 0 0.75rem;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    "
+                >
+                    <span
+                        style="
+                            font-size: 0.85rem;
+                            color: var(--muted);
+                            font-weight: 500;
+                            text-transform: uppercase;
+                            letter-spacing: 0.06em;
+                        "
+                    >
+                        Revenue — last 6 months (paid invoices)
+                    </span>
+                </div>
+
+                <div class="panel" style="padding: 1.5rem">
+                    <div id="bar-chart" style="min-height: 220px">
+                        <span style="color: var(--muted); font-size: 0.85rem"
+                            >Loading…</span
+                        >
+                    </div>
+                </div>
             </div>
         </div>
 

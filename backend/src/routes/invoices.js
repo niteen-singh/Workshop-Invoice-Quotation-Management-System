@@ -142,6 +142,37 @@ router.post("/", async (req, res) => {
     }
 });
 
+router.put("/:id/status", async (req, res) => {
+    const { status } = req.body;
+    const allowed = ["unpaid", "paid", "overdue", "cancelled", "draft"];
+
+    if (!allowed.includes(status))
+        return res
+            .status(400)
+            .json({ error: `Status must be one of: ${allowed.join(", ")}` });
+
+    try {
+        const { rows } = await pool.query(
+            `UPDATE invoices SET
+               status  = $1,
+               paid_at = $2
+             WHERE id = $3 AND user_id = $4
+             RETURNING *`,
+            [
+                status,
+                status === "paid" ? new Date() : null,
+                req.params.id,
+                req.userId,
+            ],
+        );
+        if (!rows.length)
+            return res.status(404).json({ error: "Invoice not found" });
+        res.json({ data: rows[0] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // PUT /invoices/:id — update invoice + replace line items
 router.put("/:id", async (req, res) => {
     const {
@@ -160,11 +191,9 @@ router.put("/:id", async (req, res) => {
     } = req.body;
 
     if (!customer_id || !invoice_number || !line_items?.length)
-        return res
-            .status(400)
-            .json({
-                error: "customer_id, invoice_number and line_items required",
-            });
+        return res.status(400).json({
+            error: "customer_id, invoice_number and line_items required",
+        });
 
     const total_amount = line_items.reduce((s, i) => s + Number(i.total), 0);
     const client = await pool.connect();
