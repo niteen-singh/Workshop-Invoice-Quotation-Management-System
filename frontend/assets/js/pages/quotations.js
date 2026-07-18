@@ -65,15 +65,30 @@ function renderTable(quotes) {
             <td style="color:var(--muted)">${fmtDate(q.quote_date)}</td>
             <td style="text-align:right;font-weight:500">${fmtINR(q.total_amount)}</td>
             <td style="text-align:center">${statusBadge(q.status)}</td>
-            <td style="text-align:center">
-                <a href="/quotations-view.html?id=${q.id}"
-                   style="color:var(--muted);text-decoration:none"
-                   onclick="event.stopPropagation()">→</a>
+            <td style="text-align:center" onclick="event.stopPropagation()">
+                <button onclick="deleteQuotation('${q.id}','${q.quote_number}')"
+                style="background:none;border:none;cursor:pointer;
+                color:var(--muted);font-size:1rem;padding:0.2rem 0.5rem"
+                onmouseover="this.style.color='#f09a9a'"
+                onmouseout="this.style.color='var(--muted)'"
+                title="Delete">🗑</button>
             </td>
         </tr>
     `,
         )
         .join("");
+}
+
+async function deleteQuotation(id, number) {
+    if (!confirm(`Delete quotation ${number}?\n\nThis cannot be undone.`))
+        return;
+    try {
+        await api.delete(`/quotations/${id}`);
+        allQuotes = allQuotes.filter((q) => q.id !== id);
+        renderTable(allQuotes);
+    } catch (err) {
+        alert("Failed to delete: " + err.message);
+    }
 }
 
 function filterTable(q) {

@@ -6,13 +6,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     } catch {}
 
-    // check if any users exist — show signup link if not
-    try {
-        const res = await api.get("/auth/exists");
-        if (!res.exists) {
-            document.getElementById("signup-link").style.display = "block";
-        }
-    } catch {}
+    // always show signup link — open registration
+    document.getElementById("signup-link").style.display = "block";
 });
 
 async function handleLogin(e) {
@@ -29,7 +24,6 @@ async function handleLogin(e) {
     try {
         await api.post("/auth/signin", { email, password });
 
-        // check if profile exists
         try {
             const profile = await api.get("/profile");
             if (!profile.data) {

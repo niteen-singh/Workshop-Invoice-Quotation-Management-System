@@ -1,0 +1,42 @@
+name: Deploy Backend → Railway
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - "backend/**" # only triggers when backend changes
+            - ".github/workflows/deploy-backend.yml"
+
+jobs:
+    deploy:
+        name: Deploy to Railway
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Install Railway CLI
+              run: npm install -g @railway/cli
+
+            - name: Deploy to Railway
+              run: |
+                  railway up \
+                    --service ${{ secrets.RAILWAY_SERVICE_NAME }} \
+                    --detach
+              env:
+                  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+              working-directory: backend
+
+            - name: Wait for deployment & health check
+              run: |
+                  echo "Waiting 30s for Railway to restart..."
+                  sleep 30
+                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+                    ${{ secrets.RAILWAY_BACKEND_URL }}/health)
+                  if [ "$STATUS" = "200" ]; then
+                    echo "✅ Backend is healthy (HTTP $STATUS)"
+                  else
+                    echo "❌ Health check failed (HTTP $STATUS)"
+                    exit 1
+                  fi

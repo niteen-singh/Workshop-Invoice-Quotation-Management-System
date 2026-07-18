@@ -347,6 +347,36 @@ router.put("/:id/status", async (req, res) => {
     }
 });
 
+router.delete("/:id", async (req, res) => {
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+
+        // delete line items first
+        await client.query("DELETE FROM line_items WHERE quotation_id = $1", [
+            req.params.id,
+        ]);
+
+        const { rowCount } = await client.query(
+            "DELETE FROM quotations WHERE id = $1 AND user_id = $2",
+            [req.params.id, req.userId],
+        );
+
+        if (!rowCount) {
+            await client.query("ROLLBACK");
+            return res.status(404).json({ error: "Quotation not found" });
+        }
+
+        await client.query("COMMIT");
+        res.json({ success: true });
+    } catch (err) {
+        await client.query("ROLLBACK");
+        res.status(500).json({ error: err.message });
+    } finally {
+        client.release();
+    }
+});
+
 router.get("/:id/pdf", async (req, res) => {
     const client = await pool.connect();
     try {

@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { checkPostgres, checkMinio } = require("../lib/checks");
+const { checkPostgres } = require("../lib/checks");
 
 const router = Router();
 
@@ -8,12 +8,12 @@ router.get("/health", (_req, res) => {
 });
 
 router.get("/ready", async (_req, res) => {
-    const [db, storage] = await Promise.all([checkPostgres(), checkMinio()]);
-    const allOk = db.ok && storage.ok;
+    const db = await checkPostgres();
+    const allOk = db.ok;
 
     res.status(allOk ? 200 : 503).json({
         status: allOk ? "ready" : "unavailable",
-        checks: { postgres: db, minio: storage },
+        checks: { postgres: db },
     });
 });
 

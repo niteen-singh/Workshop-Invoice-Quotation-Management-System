@@ -21,6 +21,11 @@
             <li><a href="/invoices.html" data-page="invoices">Invoices</a></li>
         </ul>
 
+        <small>Reports</small>
+        <ul>
+            <li><a href="/reports.html" data-page="reports">GST Sales</a></li>
+        </ul>
+
         <small>Account</small>
         <ul>
             <li><a href="/settings.html" data-page="settings">Settings</a></li>
@@ -36,12 +41,18 @@
         <button
             onclick="handleLogout()"
             style="
-                margin-left: auto;
+                flex-shrink: 0;
+                width: 32px;
+                height: 32px;
+                padding: 0;
                 background: none;
                 border: none;
                 cursor: pointer;
                 color: var(--muted);
                 font-size: 1.2rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             "
             title="Sign out"
         >

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Reports — Workshop IQ</title>
+        <link rel="stylesheet" href="/assets/css/app.css" />
+    </head>
+    <body>
+        <div id="sidebar-placeholder"></div>
+
+        <div id="main">
+            <div id="topbar">
+                <h4>Reports</h4>
+            </div>
+
+            <div id="content">
+                <!-- GST Sales Report card -->
+                <div class="form-section" style="max-width: 560px">
+                    <div class="form-section-title">GST Sales Register</div>
+                    <p
+                        style="
+                            font-size: 0.88rem;
+                            color: var(--muted);
+                            margin-bottom: 1.5rem;
+                            line-height: 1.6;
+                        "
+                    >
+                        Exports a
+                        <strong style="color: var(--text)">.xlsx</strong> file
+                        matching the GSTR-1 sales register format — one row per
+                        invoice per GST rate, with auto CGST+SGST vs IGST split
+                        based on state codes. Open directly in Excel or share
+                        with your CA.
+                    </p>
+
+                    <!-- Period type selector -->
+                    <div class="field-group" style="margin-bottom: 1.2rem">
+                        <label class="field-label">Period type</label>
+                        <select id="period-type" onchange="onPeriodChange()">
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly (QRMP)</option>
+                            <option value="half_yearly">Half-yearly</option>
+                            <option value="yearly">Yearly (Indian FY)</option>
+                            <option value="custom">Custom date range</option>
+                        </select>
+                    </div>
+
+                    <!-- Dynamic period inputs -->
+                    <div id="period-inputs">
+                        <!-- Monthly -->
+                        <div id="input-monthly" class="invoice-meta-grid">
+                            <div class="field-group">
+                                <label class="field-label">Month</label>
+                                <select id="month-select">
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6" selected>June</option>
+                                    <option value="7">July</option>
+                                    <option value="8">August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label">Year</label>
+                                <input
+                                    type="number"
+                                    id="monthly-year"
+                                    value="2026"
+                                    min="2020"
+                                    max="2099"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Quarterly -->
+                        <div
+                            id="input-quarterly"
+                            class="invoice-meta-grid"
+                            style="display: none"
+                        >
+                            <div class="field-group">
+                                <label class="field-label">Quarter</label>
+                                <select id="quarter-select">
+                                    <option value="1">Q1 — Apr to Jun</option>
+                                    <option value="2">Q2 — Jul to Sep</option>
+                                    <option value="3">Q3 — Oct to Dec</option>
+                                    <option value="4">Q4 — Jan to Mar</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label">FY start year</label>
+                                <input
+                                    type="number"
+                                    id="quarterly-year"
+                                    value="2026"
+                                    min="2020"
+                                    max="2099"
+                                />
+                                <span
+                                    style="
+                                        font-size: 0.75rem;
+                                        color: var(--muted);
+                                        margin-top: 3px;
+                                    "
+                                >
+                                    e.g. 2026 → FY 2026-27
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Half-yearly -->
+                        <div
+                            id="input-half_yearly"
+                            class="invoice-meta-grid"
+                            style="display: none"
+                        >
+                            <div class="field-group">
+                                <label class="field-label">Half</label>
+                                <select id="half-select">
+                                    <option value="1">H1 — Apr to Sep</option>
+                                    <option value="2">H2 — Oct to Mar</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label">FY start year</label>
+                                <input
+                                    type="number"
+                                    id="half-year"
+                                    value="2026"
+                                    min="2020"
+                                    max="2099"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Yearly -->
+                        <div
+                            id="input-yearly"
+                            class="field-group"
+                            style="display: none; max-width: 200px"
+                        >
+                            <label class="field-label">FY start year</label>
+                            <input
+                                type="number"
+                                id="yearly-year"
+                                value="2026"
+                                min="2020"
+                                max="2099"
+                            />
+                            <span
+                                id="fy-label"
+                                style="
+                                    font-size: 0.75rem;
+                                    color: var(--muted);
+                                    margin-top: 3px;
+                                "
+                            >
+                                FY 2026-27 (Apr 2026 – Mar 2027)
+                            </span>
+                        </div>
+
+                        <!-- Custom -->
+                        <div
+                            id="input-custom"
+                            class="invoice-meta-grid"
+                            style="display: none"
+                        >
+                            <div class="field-group">
+                                <label class="field-label">From date</label>
+                                <input type="date" id="custom-from" />
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label">To date</label>
+                                <input type="date" id="custom-to" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview label -->
+                    <div
+                        id="period-preview"
+                        style="
+                            margin-top: 1.2rem;
+                            padding: 0.75rem 1rem;
+                            background: var(--panel-2);
+                            border-radius: 10px;
+                            font-size: 0.85rem;
+                            color: var(--muted);
+                        "
+                    >
+                        File:
+                        <span
+                            id="filename-preview"
+                            style="color: var(--text); font-family: monospace"
+                        >
+                            GST_Sales_June_2026.xlsx
+                        </span>
+                    </div>
+
+                    <button
+                        onclick="downloadReport()"
+                        id="download-btn"
+                        style="
+                            margin-top: 1.2rem;
+                            width: 100%;
+                            padding: 0.9rem;
+                            border-radius: 12px;
+                            border: none;
+                            background: white;
+                            color: #000;
+                            font-size: 0.95rem;
+                            font-weight: 600;
+                            cursor: pointer;
+                        "
+                    >
+                        ⬇ Download GST Sales Report
+                    </button>
+
+                    <div
+                        id="report-error"
+                        style="
+                            display: none;
+                            margin-top: 1rem;
+                            padding: 0.75rem 1rem;
+                            background: #3d1a1a;
+                            border: 1px solid #6b2a2a;
+                            border-radius: 10px;
+                            color: #f09a9a;
+                            font-size: 0.85rem;
+                        "
+                    ></div>
+                </div>
+
+                <!-- More report types placeholder -->
+                <div
+                    class="form-section"
+                    style="max-width: 560px; margin-top: 1.5rem; opacity: 0.4"
+                >
+                    <div class="form-section-title">
+                        More reports coming soon
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--muted)">
+                        Purchase register · Customer-wise summary · HSN summary
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <script src="/assets/js/api.js"></script>
+        <script src="/assets/js/layout.js"></script>
+        <script src="/assets/js/pages/reports.js"></script>
+        <script>
+            loadSidebar("reports");
+        </script>
+    </body>
+</html>

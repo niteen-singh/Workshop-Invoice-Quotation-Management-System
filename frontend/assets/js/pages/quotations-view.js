@@ -142,6 +142,31 @@ async function cycleStatus() {
     }
 }
 
+// Delete Quotation
+async function deleteQuotation() {
+    if (!currentQuote) return;
+
+    if (
+        !confirm(
+            `Delete quotation ${currentQuote.quote_number}?\n\nThis cannot be undone.`,
+        )
+    )
+        return;
+
+    const btn = document.getElementById("delete-btn");
+    btn.setAttribute("aria-busy", "true");
+    btn.disabled = true;
+
+    try {
+        await api.delete(`/quotations/${quoteId}`);
+        window.location.href = "/quotations.html";
+    } catch (err) {
+        alert("Failed to delete: " + err.message);
+        btn.removeAttribute("aria-busy");
+        btn.disabled = false;
+    }
+}
+
 // ── PDF download ──────────────────────────────────────────
 async function downloadPdf() {
     const btn = document.getElementById("pdf-btn");

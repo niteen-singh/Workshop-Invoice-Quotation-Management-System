@@ -1,0 +1,31 @@
+name: Deploy Frontend → Netlify
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - "frontend/**" # only triggers when frontend changes
+            - ".github/workflows/deploy-frontend.yml"
+
+jobs:
+    deploy:
+        name: Build & Deploy to Netlify
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Deploy to Netlify
+              uses: nwtgck/actions-netlify@v3
+              with:
+                  publish-dir: "./frontend"
+                  production-branch: main
+                  production-deploy: true
+                  deploy-message: "Deploy from GitHub Actions — ${{ github.sha }}"
+                  enable-pull-request-comment: false
+                  enable-commit-comment: false
+              env:
+                  NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+                  NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+              timeout-minutes: 5

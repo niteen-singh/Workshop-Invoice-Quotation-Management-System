@@ -1,11 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    // if users already exist, signup is closed
-    try {
-        const res = await api.get("/auth/exists");
-        if (res.exists) {
-            window.location.href = "/login.html";
-        }
-    } catch {}
+    // single uses code
+    // anyone can sign up now — multi-user system
 });
 
 async function handleSignup(e) {
@@ -37,7 +32,6 @@ async function handleSignup(e) {
 
     try {
         await api.post("/auth/signup", { name, email, password });
-        // redirect to settings on first login
         window.location.href = "/settings.html?setup=1";
     } catch (err) {
         errorDiv.textContent = err.message;

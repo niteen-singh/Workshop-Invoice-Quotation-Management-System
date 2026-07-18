@@ -169,6 +169,31 @@ async function cycleStatus() {
     }
 }
 
+// Invocice delete
+async function deleteInvoice() {
+    if (!currentInvoice) return;
+
+    if (
+        !confirm(
+            `Delete invoice ${currentInvoice.invoice_number}?\n\nThis cannot be undone.`,
+        )
+    )
+        return;
+
+    const btn = document.getElementById("delete-btn");
+    btn.setAttribute("aria-busy", "true");
+    btn.disabled = true;
+
+    try {
+        await api.delete(`/invoices/${invoiceId}`);
+        window.location.href = "/invoices.html";
+    } catch (err) {
+        alert("Failed to delete: " + err.message);
+        btn.removeAttribute("aria-busy");
+        btn.disabled = false;
+    }
+}
+
 // ── PDF download ──────────────────────────────────────────
 async function downloadPdf() {
     const btn = document.getElementById("pdf-btn");

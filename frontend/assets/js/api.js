@@ -8,6 +8,7 @@ async function request(method, path, body) {
 
     const res = await fetch(url, {
         method,
+        credentials: "include",
         headers: {
             "Content-Type": "application/json",
             "Cache-Control": "no-cache",

@@ -214,61 +214,108 @@ body {
 
 #sidebar-placeholder footer {
     padding: 1.25rem 1.5rem;
-
     border-top: 1px solid rgba(255, 255, 255, 0.06);
-
     display: flex;
     align-items: center;
     gap: 0.9rem;
+    flex-shrink: 0;
+}
 
-    background: linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.01),
-        rgba(255, 255, 255, 0.02)
-    );
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #2d5fff, #1f3f9f);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 700;
+    flex-shrink: 0; /* ← never shrink avatar */
+}
 
-    backdrop-filter: blur(12px);
+.user-meta {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* ← take all available space */
+    min-width: 0; /* ← required for truncation to work in flex */
+    overflow: hidden;
+}
+
+.user-meta strong {
+    color: white;
+    font-size: 0.92rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block; /* ← needed for text-overflow to work */
+}
+
+.user-meta small {
+    margin-top: 0.15rem;
+    color: #8d8d8d;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+/* logout button — fixed size, never grows */
+#sidebar-placeholder footer button {
+    flex-shrink: 0; /* ← never shrink logout button */
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
 }
 
 /* avatar */
 .user-avatar {
     width: 48px;
     height: 48px;
-
     border-radius: 50%;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     background: linear-gradient(135deg, #2d5fff, #1f3f9f);
-
     color: white;
-
     font-size: 0.95rem;
     font-weight: 700;
-
-    box-shadow: 0 10px 24px rgba(45, 95, 255, 0.25);
+    flex-shrink: 0; /* ← never shrink avatar */
 }
 
 .user-meta {
     display: flex;
     flex-direction: column;
+    flex: 1; /* ← take all available space */
+    min-width: 0; /* ← required for truncation to work in flex */
+    overflow: hidden;
 }
 
 .user-meta strong {
-    color: #ffffff;
-
+    color: white;
     font-size: 0.92rem;
     line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block; /* ← needed for text-overflow to work */
 }
 
 .user-meta small {
     margin-top: 0.15rem;
-
     color: #8d8d8d;
-
     font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
 }
 
 /* =========================================================
@@ -733,13 +780,23 @@ tbody tr:hover {
 /* ── Modal footer buttons ───────────────────────────────── */
 dialog article footer {
     display: flex;
+    align-items: center;
     gap: 0.75rem;
     justify-content: flex-end;
     padding-top: 1rem;
 }
 
 dialog article footer button {
-    margin: 0;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding-left: 1.2rem !important;
+    padding-right: 1.2rem !important;
+    box-sizing: border-box !important;
 }
 
 /* =========================================================

@@ -6,10 +6,10 @@ const { pool } = require("../lib/checks");
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 const COOKIE_OPTS = {
-    httpOnly: true, // JS cannot read this cookie
-    sameSite: "strict", // no cross-site requests
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    secure: process.env.NODE_ENV === "production" ? true : false,
+    maxAge: 24 * 60 * 60 * 1000,
 };
 
 // ── GET /auth/me ──────────────────────────────────────────
@@ -59,15 +59,6 @@ router.post("/signup", async (req, res) => {
             .json({ error: "Password must be at least 8 characters" });
 
     try {
-        // only allow signup if no users exist yet
-        const { rows: existing } = await pool.query(
-            "SELECT COUNT(*) FROM users",
-        );
-        if (parseInt(existing[0].count) > 0)
-            return res
-                .status(403)
-                .json({ error: "Signup is closed. Contact the admin." });
-
         const hash = await bcrypt.hash(password, 12);
         const { rows } = await pool.query(
             `INSERT INTO users (name, email, password)
