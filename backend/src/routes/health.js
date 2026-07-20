@@ -4,7 +4,7 @@ const { checkPostgres } = require("../lib/checks");
 const router = Router();
 
 router.get("/health", (_req, res) => {
-    res.json({ status: "OK", uptime: Math.floor(process.uptime()) });
+    res.json({ status: "working", uptime: Math.floor(process.uptime()) });
 });
 
 router.get("/ready", async (_req, res) => {
