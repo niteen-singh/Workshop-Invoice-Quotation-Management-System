@@ -1,41 +1,40 @@
-name: Deploy Backend → Railway
+name: Deploy Backend → Render
 
 on:
     push:
         branches: [main]
         paths:
-            - "backend/**" # only triggers when backend changes
+            - "backend/**"
             - ".github/workflows/deploy-backend.yml"
 
 jobs:
     deploy:
-        name: Deploy to Railway
+        name: Deploy to Render
         runs-on: ubuntu-latest
 
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Install Railway CLI
-              run: npm install -g @railway/cli
-
-            - name: Deploy to Railway
+            - name: Trigger Render deploy
               run: |
-                  railway up \
-                    --service ${{ secrets.RAILWAY_SERVICE_NAME }} \
-                    --detach
-              env:
-                  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-              working-directory: backend
+                  curl -X POST \
+                    "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
+                    -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+                    -H "Content-Type: application/json" \
+                    -d '{"clearCache": false}'
 
-            - name: Wait for deployment & health check
+            - name: Wait for deploy to complete
               run: |
-                  echo "Waiting 30s for Railway to restart..."
-                  sleep 30
+                  echo "Waiting 60s for Render to build and restart..."
+                  sleep 60
+
+            - name: Health check
+              run: |
                   STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-                    ${{ secrets.RAILWAY_BACKEND_URL }}/health)
+                    ${{ secrets.RENDER_BACKEND_URL }}/health)
                   if [ "$STATUS" = "200" ]; then
-                    echo "✅ Backend is healthy (HTTP $STATUS)"
+                    echo "✅ Backend healthy (HTTP $STATUS)"
                   else
                     echo "❌ Health check failed (HTTP $STATUS)"
                     exit 1
