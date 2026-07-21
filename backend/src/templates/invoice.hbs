@@ -459,15 +459,15 @@
             <table>
                 <!-- Row 1: Rs in words + Sub Total -->
                 <tr class="words-row">
-                    <td style="width:52%">
+                    <td colspan="2" style="width:68%">
                         <span class="bold">Rs. in words :</span>
                         {{totals.grandTotalWords}}
                     </td>
-                    <td style="width:16%"></td>
-                    <td style="width:16%" class="total-label">Sub Total</td>
-                    <td
-                        style="width:16%;text-align:right"
-                    >{{totals.subtotal}}</td>
+
+                    <td class="total-label">Sub Total</td>
+                    <td style="text-align:right">
+                        {{totals.subtotal}}
+                    </td>
                 </tr>
 
                 <!-- Row 2: Bank (rowspan 4) | Vehicle No (rowspan 4 ← was 2) | CGST -->
