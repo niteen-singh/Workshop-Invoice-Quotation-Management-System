@@ -130,7 +130,7 @@
                 padding: 4px 6px;
             }
 
-            /* ── PARTY + META ──────────────── */
+            /* ── PARTY + META ──────────────────────── */
             .party-section td {
                 vertical-align: top;
                 padding: 6px 7px;
@@ -143,17 +143,32 @@
                 width: 48%;
             }
 
-            .meta-table td {
-                height: 28px;
-                font-size: 11.5px;
-                padding: 2px 4px;
+            .meta-table {
+                width: 100%;
+                border-collapse: collapse;
             }
 
+            .meta-table td {
+                height: 26px;
+                font-size: 11px;
+                padding: 2px 5px;
+                vertical-align: middle;
+            }
+
+            /* ← key fix: was 40%, now 30% so value cells get more room */
             .meta-label {
-                width: 40%;
+                width: 30%;
                 font-weight: bold;
                 white-space: nowrap;
             }
+
+            /* value cells — explicit widths so nothing gets squeezed */
+            .meta-val-main {
+                width: 25%;
+            } /* invoice no / challan no / po no */
+            .meta-val-date {
+                width: 45%;
+            } /* date value — wider */
 
             /* ── ITEMS TABLE ───────────────── */
             .items-table {
@@ -350,24 +365,36 @@
                         <table class="meta-table">
                             <tr>
                                 <td class="meta-label">Invoice No. :</td>
-                                <td>{{invoiceMeta.invoiceNo}}</td>
+                                <td
+                                    class="meta-val-main"
+                                >{{invoiceMeta.invoiceNo}}</td>
                                 <td class="meta-label">Date :</td>
-                                <td>{{invoiceMeta.invoiceDate}}</td>
+                                <td
+                                    class="meta-val-date"
+                                >{{invoiceMeta.invoiceDate}}</td>
                             </tr>
                             {{#if invoiceMeta.challanNo}}
                                 <tr>
                                     <td class="meta-label">Challan No. :</td>
-                                    <td>{{invoiceMeta.challanNo}}</td>
+                                    <td
+                                        class="meta-val-main"
+                                    >{{invoiceMeta.challanNo}}</td>
                                     <td class="meta-label">Date :</td>
-                                    <td>{{invoiceMeta.challanDate}}</td>
+                                    <td
+                                        class="meta-val-date"
+                                    >{{invoiceMeta.challanDate}}</td>
                                 </tr>
                             {{/if}}
                             {{#if invoiceMeta.poNo}}
                                 <tr>
                                     <td class="meta-label">P.O. No. :</td>
-                                    <td>{{invoiceMeta.poNo}}</td>
+                                    <td
+                                        class="meta-val-main"
+                                    >{{invoiceMeta.poNo}}</td>
                                     <td class="meta-label">Date :</td>
-                                    <td>{{invoiceMeta.poDate}}</td>
+                                    <td
+                                        class="meta-val-date"
+                                    >{{invoiceMeta.poDate}}</td>
                                 </tr>
                             {{/if}}
                             {{#if invoiceMeta.vendorCode}}
@@ -430,9 +457,9 @@
 -->
 
             <table>
-                <!-- Row 1: Rs in words (A+B) | Sub Total label (C) | Sub Total value (D) -->
+                <!-- Row 1: Rs in words + Sub Total -->
                 <tr class="words-row">
-                    <td colspan="2" style="width:68%">
+                    <td style="width:52%">
                         <span class="bold">Rs. in words :</span>
                         {{totals.grandTotalWords}}
                     </td>
@@ -442,7 +469,7 @@
                     >{{totals.subtotal}}</td>
                 </tr>
 
-                <!-- Row 2: Bank(A, rowspan 4) | Vehicle No(B, rowspan 2) | CGST(C+D) -->
+                <!-- Row 2: Bank (rowspan 4) | Vehicle No (rowspan 4 ← was 2) | CGST -->
                 <tr>
                     <td
                         rowspan="4"
@@ -467,19 +494,18 @@
                         </table>
                     </td>
 
-                    <!-- Vehicle No — rowspan 2 -->
+                    <!-- ← rowspan="4" now covers all 4 rows, no empty block below -->
                     <td
-                        rowspan="2"
+                        rowspan="4"
                         style="width:16%;text-align:center;font-weight:bold;
-                   font-size:11.5px;vertical-align:top;padding:8px 4px"
+                   font-size:11.5px;vertical-align:middle;padding:8px 4px"
                     >
                         Vehicle No.<br /><br />
                         {{shippingDetails}}
                     </td>
 
-                    <td style="width:16%" class="total-label">CGST @
-                        {{totals.cgstRate}}%</td>
-                    <td style="width:16%;text-align:right">{{totals.cgst}}</td>
+                    <td class="total-label">CGST @ {{totals.cgstRate}}%</td>
+                    <td style="text-align:right">{{totals.cgst}}</td>
                 </tr>
 
                 <!-- Row 3: SGST -->
@@ -488,25 +514,25 @@
                     <td style="text-align:right">{{totals.sgst}}</td>
                 </tr>
 
-                <!-- Row 4: (empty below vehicle) | Round Off -->
+                <!-- Row 4: Round Off -->
                 <tr>
-                    <td
-                        style="width:16%;border-top:none;border-bottom:none"
-                    ></td>
                     <td class="total-label">Round Off</td>
                     <td style="text-align:right">{{totals.roundOff}}</td>
                 </tr>
 
-                <!-- Row 5: Grand Total -->
+                <!-- Row 5: Grand Total — no empty <td> needed anymore -->
                 <tr class="grand-row">
-                    <td style="border-top:none"></td>
                     <td class="total-label">
                         Grand Total
                         <span
                             style="font-size:9px;font-weight:normal"
                         >&nbsp;E.&amp;O.E.</span>
                     </td>
-                    <td style="text-align:right">{{totals.grandTotal}}</td>
+                    <td
+                        style="text-align:right;font-weight:bold;font-size:13px"
+                    >
+                        {{totals.grandTotal}}
+                    </td>
                 </tr>
             </table>
 
