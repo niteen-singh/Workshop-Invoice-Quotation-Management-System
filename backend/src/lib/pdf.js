@@ -278,13 +278,13 @@ async function generatePDF(html) {
         });
         console.timeEnd("setcontent");
 
-        console.time("page");
+        console.time("pager");
         return await page.pdf({
             format: "A4",
             printBackground: true,
             margin: { top: "8mm", right: "8mm", bottom: "8mm", left: "8mm" },
         });
-        console.timeEnd("page");
+        console.timeEnd("pager");
     } finally {
         console.time("browser");
         if (browser) {
