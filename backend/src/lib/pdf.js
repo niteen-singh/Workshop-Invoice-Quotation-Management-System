@@ -267,9 +267,9 @@ async function generatePDF(html) {
         });
         console.timeEnd("launch");
 
-        console.time("npage");
+        console.time("newpage");
         const page = await browser.newPage();
-        console.timeEnd("npage");
+        console.timeEnd("newpage");
 
         console.time("setcontent");
         await page.setContent(html, {
