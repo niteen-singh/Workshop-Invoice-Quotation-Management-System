@@ -235,23 +235,66 @@ function renderHTML(data) {
 
 // ── Puppeteer → PDF buffer ────────────────────────────────
 async function generatePDF(html) {
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-        ],
-    });
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
-    const pdf = await page.pdf({
-        format: "A4",
-        printBackground: true,
-        margin: { top: "8mm", right: "8mm", bottom: "8mm", left: "8mm" },
-    });
-    await browser.close();
+    // const browser = await puppeteer.launch({
+    //     headless: true,
+    //     args: [
+    //         "--no-sandbox",
+    //         "--disable-setuid-sandbox",
+    //         "--disable-dev-shm-usage",
+    //     ],
+    // });
+    // const page = await browser.newPage();
+    // await page.setContent(html, { waitUntil: "networkidle0" });
+    // const pdf = await page.pdf({
+    //     format: "A4",
+    //     printBackground: true,
+    //     margin: { top: "8mm", right: "8mm", bottom: "8mm", left: "8mm" },
+    // });
+    // await browser.close();
+    // return pdf;
+
+    let browser;
+
+    try {
+        console.time("launch");
+        browser = await puppeteer.launch({
+            headless: true,
+            args: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+            ],
+        });
+        console.timeEnd("launch");
+
+        console.time("page");
+        const page = await browser.newPage();
+        console.timeEnd("page");
+
+        console.time("setcontent");
+        await page.setContent(html, {
+            waitUntil: "domcontentloaded",
+            timeout: 60000,
+        });
+        console.timeEnd("setcontent");
+
+        console.time("page");
+        return await page.pdf({
+            format: "A4",
+            printBackground: true,
+            margin: { top: "8mm", right: "8mm", bottom: "8mm", left: "8mm" },
+        });
+        console.timeEnd("page");
+    } finally {
+        console.time("browser");
+        if (browser) {
+            await browser.close();
+        }
+        console.timeEnd("browser");
+    }
+    console.time("res");
     return pdf;
+    console.timeEnd("res");
 }
 
 // Quotations
