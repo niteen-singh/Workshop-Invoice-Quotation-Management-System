@@ -279,12 +279,19 @@ async function generatePDF(html) {
         console.timeEnd("setcontent");
 
         console.time("pdf");
-        return await page.pdf({
+        const pdf = await page.pdf({
             format: "A4",
             printBackground: true,
-            margin: { top: "8mm", right: "8mm", bottom: "8mm", left: "8mm" },
+            margin: {
+                top: "8mm",
+                right: "8mm",
+                bottom: "8mm",
+                left: "8mm",
+            },
         });
         console.timeEnd("pdf");
+
+        return pdf;
     } finally {
         console.time("browser");
         if (browser) {
@@ -292,9 +299,6 @@ async function generatePDF(html) {
         }
         console.timeEnd("browser");
     }
-    console.time("res");
-    return pdf;
-    console.timeEnd("res");
 }
 
 // Quotations
