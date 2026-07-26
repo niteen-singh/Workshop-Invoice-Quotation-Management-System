@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const cookieParser = require("cookie-parser");
 const healthRouter = require("./routes/health");
 const authRouter = require("./routes/auth");
@@ -26,6 +27,8 @@ app.use(cookieParser()); // ← must be before routes so req.cookies works
 // Public routes — no auth needed
 app.use("/", healthRouter);
 app.use("/auth", authRouter);
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Protected routes — all require valid JWT cookie
 app.use("/dashboard", requireAuth, dashboardRouter);

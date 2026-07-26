@@ -48,6 +48,114 @@ function showToast(message, isError = false) {
     }, 3000);
 }
 
+// ── Logo preview helpers ────────────────────────────────────
+// NOTE: uses the same `BASE` ("/api") constant that api.js declares at the
+// top level — script tags on the same page share a global scope, so this
+// is visible here as long as api.js loads before settings.js (it does, per
+// settings.html's <script> order). This keeps logo requests going through
+// whatever proxy/rewrite makes api.js's own "/api/..." calls reach the
+// backend correctly.
+function logoUrl(logoPath) {
+    if (!logoPath) return null;
+    const clean = logoPath.replace(/^\/+/, "");
+    // Cache-bust so re-uploading under a new filename always shows fresh.
+    return `${BASE}/${clean}?t=${Date.now()}`;
+}
+
+function renderLogoPreview(logoPath) {
+    const img = document.getElementById("logo-preview");
+    const empty = document.getElementById("logo-preview-empty");
+    const removeBtn = document.getElementById("logo-remove-btn");
+
+    const url = logoUrl(logoPath);
+    if (url) {
+        img.src = url;
+        img.style.display = "block";
+        empty.style.display = "none";
+        removeBtn.style.display = "inline-block";
+    } else {
+        img.style.display = "none";
+        img.removeAttribute("src");
+        empty.style.display = "block";
+        removeBtn.style.display = "none";
+    }
+}
+
+async function onLogoSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+        showToast("Logo must be under 2MB.", true);
+        event.target.value = "";
+        return;
+    }
+
+    const uploadBtn = document.getElementById("logo-upload-btn");
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = "Uploading...";
+
+    try {
+        const formData = new FormData();
+        formData.append("logo", file);
+
+        // Raw fetch (not the api.* JSON helper) since this is a
+        // multipart/form-data upload — let the browser set the
+        // Content-Type boundary itself, don't set it manually.
+        // Routed through the same BASE prefix as api.js for consistency.
+        const res = await fetch(`${BASE}/profile/logo`, {
+            method: "POST",
+            credentials: "include",
+            body: formData,
+        });
+
+        if (res.status === 401) {
+            window.location.href = "/login.html";
+            return;
+        }
+
+        const body = await res.json();
+        if (!res.ok) throw new Error(body.error || "Upload failed");
+
+        renderLogoPreview(body.logo_path);
+        showToast("Logo uploaded.");
+    } catch (err) {
+        showToast("Failed to upload logo: " + err.message, true);
+    } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = "Upload logo";
+        event.target.value = "";
+    }
+}
+
+async function removeLogo() {
+    const removeBtn = document.getElementById("logo-remove-btn");
+    removeBtn.disabled = true;
+
+    try {
+        const res = await fetch(`${BASE}/profile/logo`, {
+            method: "DELETE",
+            credentials: "include",
+        });
+
+        if (res.status === 401) {
+            window.location.href = "/login.html";
+            return;
+        }
+
+        const body = await res.json();
+        if (!res.ok) throw new Error(body.error || "Failed to remove logo");
+
+        renderLogoPreview(null);
+        showToast("Logo removed.");
+    } catch (err) {
+        showToast("Failed to remove logo: " + err.message, true);
+    } finally {
+        removeBtn.disabled = false;
+    }
+}
+
+// ── Profile load / save (unchanged text-field behavior) ────
 async function loadProfile() {
     if (new URLSearchParams(window.location.search).get("setup") === "1") {
         document.getElementById("setup-banner").style.display = "block";
@@ -55,13 +163,17 @@ async function loadProfile() {
 
     try {
         const res = await api.get("/profile");
-        if (!res.data) return;
+        if (!res.data) {
+            renderLogoPreview(null);
+            return;
+        }
 
         profileExists = true;
         FIELDS.forEach((key) => {
             const el = document.getElementById(key);
             if (el) el.value = res.data[key] ?? "";
         });
+        renderLogoPreview(res.data.logo_path ?? null);
     } catch (err) {
         console.error("Failed to load profile:", err);
     }

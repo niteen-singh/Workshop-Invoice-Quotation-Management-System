@@ -78,6 +78,48 @@ function amountInWords(amount) {
     return words + " Only";
 }
 
+// ── Logo helper ─────────────────────────────────────────────
+// Reads a logo file from disk and returns a base64 data: URI so it can be
+// embedded directly in the HTML that Puppeteer renders (Puppeteer's
+// setContent() has no access to arbitrary local file paths, so inlining is
+// the most reliable approach). Returns null on any failure so the invoice
+// still renders fine without a logo instead of throwing — this is what
+// makes the logo optional end-to-end.
+const LOGO_MIME_MAP = {
+    ".svg": "image/svg+xml",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp",
+};
+
+function getLogoDataUri(logoPath) {
+    if (!logoPath) return null;
+    try {
+        const absPath = path.isAbsolute(logoPath)
+            ? logoPath
+            : path.join(__dirname, "..", logoPath);
+
+        const ext = path.extname(absPath).toLowerCase();
+        const mime = LOGO_MIME_MAP[ext];
+        if (!mime) {
+            console.warn(`Unsupported logo file type: ${ext}`);
+            return null;
+        }
+
+        if (!fs.existsSync(absPath)) {
+            console.warn(`Logo file not found: ${absPath}`);
+            return null;
+        }
+
+        const buffer = fs.readFileSync(absPath);
+        return `data:${mime};base64,${buffer.toString("base64")}`;
+    } catch (err) {
+        console.error("Logo read error:", err);
+        return null;
+    }
+}
+
 // ── Indian number format ──────────────────────────────────
 function fmt(n) {
     return parseFloat(n).toLocaleString("en-IN", {
@@ -143,6 +185,9 @@ function buildTemplateData(invoice, lineItems, customer, profile) {
             gstin: profile.gstin ?? "",
             state: profile.state ?? "",
             stateCode: profile.state_code ?? "",
+            // Optional — null when the user hasn't uploaded one, which the
+            // template's {{#if seller.logo}} already handles gracefully.
+            logo: getLogoDataUri(profile.logo_path),
         },
         buyer: {
             companyName: customer.name ?? "",
@@ -242,7 +287,8 @@ function buildQuotationData(quotation, lineItems, customer, profile) {
             email: profile.email ?? "",
             gstin: profile.gstin ?? "",
             pan: profile.pan ?? "",
-            logo: null,
+            // Was hardcoded to null before — now optional-and-wired, same as invoices.
+            logo: getLogoDataUri(profile.logo_path),
         },
         buyer: {
             companyName: customer.name ?? "",
@@ -275,8 +321,6 @@ function buildQuotationData(quotation, lineItems, customer, profile) {
 }
 
 function renderQuotationHTML(data) {
-    const path = require("path");
-    const fs = require("fs");
     const templatePath = path.join(__dirname, "../templates/quotation.hbs");
     const source = fs.readFileSync(templatePath, "utf8");
     const template = handlebars.compile(source);
@@ -289,4 +333,5 @@ module.exports = {
     buildQuotationData,
     renderQuotationHTML,
     generatePDF,
+    getLogoDataUri,
 };

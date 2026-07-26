@@ -36,6 +36,98 @@
                     👋 Welcome! Fill in your company and bank details to get
                     started. This only needs to be done once.
                 </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">
+                        Company logo
+                        <span
+                            style="
+                                font-weight: 400;
+                                font-size: 0.8rem;
+                                color: var(--text-muted, #888);
+                                margin-left: 0.4rem;
+                            "
+                            >(optional)</span
+                        >
+                    </div>
+                    <div
+                        style="display: flex; align-items: center; gap: 1.25rem"
+                    >
+                        <div
+                            id="logo-preview-box"
+                            style="
+                                width: 100px;
+                                height: 70px;
+                                border: 1px dashed var(--border);
+                                border-radius: 10px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                overflow: hidden;
+                                background: var(--panel);
+                                flex-shrink: 0;
+                            "
+                        >
+                            <img
+                                id="logo-preview"
+                                style="
+                                    display: none;
+                                    max-width: 100%;
+                                    max-height: 100%;
+                                    object-fit: contain;
+                                "
+                            />
+                            <span
+                                id="logo-preview-empty"
+                                style="
+                                    font-size: 0.75rem;
+                                    color: var(--text-muted, #888);
+                                "
+                                >No logo</span
+                            >
+                        </div>
+
+                        <div>
+                            <input
+                                type="file"
+                                id="logo-input"
+                                accept=".svg,.png,.jpg,.jpeg,.webp"
+                                style="display: none"
+                                onchange="onLogoSelected(event)"
+                            />
+                            <button
+                                type="button"
+                                onclick="
+                                    document
+                                        .getElementById('logo-input')
+                                        .click()
+                                "
+                                id="logo-upload-btn"
+                            >
+                                Upload logo
+                            </button>
+                            <button
+                                type="button"
+                                onclick="removeLogo()"
+                                id="logo-remove-btn"
+                                style="display: none; margin-left: 0.5rem"
+                            >
+                                Remove
+                            </button>
+                            <div
+                                style="
+                                    font-size: 0.75rem;
+                                    color: var(--text-muted, #888);
+                                    margin-top: 0.4rem;
+                                "
+                            >
+                                SVG, PNG, JPG or WEBP. Max 2MB. Appears top-left
+                                on your invoices and quotations.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="settings-section">
                     <div class="settings-section-title">Company details</div>
                     <div class="settings-grid">
