@@ -30,6 +30,14 @@ app.use("/auth", authRouter);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+const uploads = path.join(__dirname, "src/uploads/logos");
+
+console.log("Uploads exists:", fs.existsSync(uploads));
+
+if (fs.existsSync(uploads)) {
+    console.log("Files:", fs.readdirSync(uploads));
+}
+
 // Protected routes — all require valid JWT cookie
 app.use("/dashboard", requireAuth, dashboardRouter);
 app.use("/customers", requireAuth, customersRouter);
